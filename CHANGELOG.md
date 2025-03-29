@@ -7,6 +7,11 @@
   - Call Center UI (`ui/call-center-ui.html`)
   - Transcript Chat Page (`ui/transcript-chat-page.html`)
   - Uploads Page (`ui/uploads-page.html`)
+- Complete project structure:
+  - Express.js routes for all major features
+  - EJS view templates
+  - AWS integration utilities
+  - Configuration files
 
 ### Changed
 - Updated infrastructure template configuration in `template.yaml`
