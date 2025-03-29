@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CallInsight | Uploads</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #a5b4fc;
+            --secondary: #4b5563;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 0.375rem;
+            --radius-sm: 0.25rem;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+        }
+        
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 30;
+        }
+        
+        .sidebar-logo {
+            padding: 1.5rem 1.5rem 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-logo svg {
+            width: 32px;
+            height: 32px;
+            margin-right: 0.5rem;
+        }
+        
+        .sidebar-logo h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            letter-spacing: -0.025em;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background-color: var(--gray-200);
+            margin: 0.5rem 0;
+        }
+        
+        .sidebar-section {
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-group {
+            margin-bottom: 1rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            border-radius: var(--radius);
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+        
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+        }
+        
+        .user-profile {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+        
+        .user-info {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+        
+        .user-role {
+            color: var(--gray-500);
+            font-size: 0.75rem;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            margin-left: 240px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .page-subtitle {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+        
+        /* Actions bar */
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .search-bar {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.5rem 0.5rem 0.5rem 2rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            background-color: var(--gray-50);
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .search-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        
+        .search-bar svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--gray-500);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--gray-100);
+        }
+        
+        /* Content cards */
+        .content-card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+        
+        .content-card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .content-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .content-card-body {
+            padding: 1.25rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            color: var(--gray-900);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            color: var(--gray-500);
+            background-color: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background-color: var(--gray-50);
+        }
+        
+        .table-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        .table-info {
+            font-size: 0.875rem;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .pagination-button {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background-color: white;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pagination-button:hover {
+            background-color: var(--gray-100);
+        }
+        
+        .pagination-button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Progress indicators */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: var(--gray-200);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 9999px;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-info {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+        
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+        }
+        
+        .upload-icon {
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 68px;
+                overflow: hidden;
+            }
+            
+            .sidebar-logo h1,
+            .nav-link span,
+            .user-info {
+                display: none;
+            }
+            
+            .nav-link svg {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 68px;
+            }
+        }
+
+        /* File cards */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .file-card {
+            background-color: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        
+        .file-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .file-header {
+            padding: 1rem;
+            background-color: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .file-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .file-title {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--gray-800);
+            flex: 1;
+        }
+        
+        .file-menu {
+            color: var(--gray-500);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .file-body {
+            padding: 1rem;
+        }
+        
+        .file-metadata {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .file-metadata-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .file-footer {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+        
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .file-action-btn {
+            background: none;
+            border: none;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .file-action-btn:hover {
+            color: var(--gray-800);
+        }
+        
+        /* Batch upload section */
+        .batch-upload-section {
+            margin-top: 2rem;
+        }
+        
+        .batch-summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .batch-stat {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .batch-stat-title {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+        }
+        
+        .batch-stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+                <h1>CallInsight</h1>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Overview</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link">
+                        <svg data-feather="home"></svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="activity"></svg>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Management</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link active">
+                        <svg data-feather="upload"></svg>
+                        <span>Uploads</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="list"></svg>
+                        <span>Queues</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="file-text"></svg>
+                        <span>Transcripts</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="pie-chart"></svg>
+                        <span>Reports</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Settings</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link">
+                        <svg data-feather="users"></svg>
+                        <span>Team</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="settings"></svg>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">AM</div>
+                <div class="user-info">
+                    <div class="user-name">Amit Mehta</div>
+                    <div class="user-role">Admin</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Call Uploads</h1>
+                    <div class="page-subtitle">Manage your call recording uploads and processing</div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary">
+                        <svg data-feather="settings"></svg>
+                        <span>Upload Settings</span>
+                    </button>
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <svg data-feather="upload"></svg>
+                        <span>Upload Calls</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <div class="content-card-header">
+                    <div class="content-card-title">Quick Upload</div>
+                </div>
+                <div class="content-card-body">
+                    <div class="upload-area" id="dropArea">
+                        <div class="upload-icon">
+                            <svg data-feather="upload-cloud" width="48" height="48"></svg>
+                        </div>
+                        <div class="upload-text">
+                            <strong>Click to upload</strong> or drag and drop call recordings
+                        </div>
+                        <div class="upload-hint">
+                            Supports AAC audio files (Max: 50MB per file)
+                        </div>
+                        <input type="file" id="fileInput" style="display: none;" multiple accept=".aac">
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 240px;">
+                            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Processing Queue</label>
+                            <select style="width: 100%; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+                                <option>Standard Queue (Processing time: ~30 mins)</option>
+                                <option>Priority Queue (Processing time: ~10 mins)</option>
+                                <option>Batch Processing (Schedule for off-peak hours)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="flex: 1; min-width: 240px;">
+                            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Categories</label>
+                            <select style="width: 100%; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+                                <option>All Categories</option>
+                                <option>Account Issues</option>
+                                <option>Transaction Problems</option>
+                                <option>Technical Support</option>
+                                <option>Product Inquiries</option>
+                            </select>
+                        </div>
+                        
+                        <div style="flex: 1; min-width: 240px;">
+                            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Tags</label>
+                            <input type="text" placeholder="E.g., product-inquiry, escalation, hindi" style="width: 100%; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions-bar">
+                <div class="search-bar">
+                    <svg data-feather="search"></svg>
+                    <input type="text" placeholder="Search by call ID, date, or status...">
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary">
+                        <svg data-feather="filter"></svg>
+                        <span>Filter</span>
+                    </button>
+                    <button class="btn btn-secondary">
+                        <svg data-feather="calendar"></svg>
+                        <span>Last 7 days</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active">Recent Uploads</div>
+                <div class="tab">Processing</div>
+                <div class="tab">Completed</div>
+                <div class="tab">Failed</div>
+            </div>
+            
+            <div class="upload-grid">
+                <div class="file-card">
+                    <div class="file-header">
+                        <div class="file-icon">
+                            <svg data-feather="mic" width="16" height="16"></svg>
+                        </div>
+                        <div class="file-title">CALL-2023-0475.aac</div>
+                        <button class="file-menu">
+                            <svg data-feather="more-vertical" width="16" height="16"></svg>
+                        </button>
+                    </div>
+                    <div class="file-body">
+                        <div class="file-metadata">
+                            <div class="file-metadata-item">
+                                <span>Upload Date</span>
+                                <span>Aug 21, 2023 15:42</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>File Size</span>
+                                <span>12.4 MB</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Duration</span>
+                                <span>14:26</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Queue</span>
+                                <span>Standard</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                                <span>Transcription Progress</span>
+                                <span>45%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-footer">
+                        <div class="file-status">
+                            <svg data-feather="loader" width="12" height="12"></svg>
+                            <span>Processing</span>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-action-btn">
+                                <svg data-feather="pause" width="14" height="14"></svg>
+                            </button>
+                            <button class="file-action-btn">
+                                <svg data-feather="info" width="14" height="14"></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="file-card">
+                    <div class="file-header">
+                        <div class="file-icon">
+                            <svg data-feather="mic" width="16" height="16"></svg>
+                        </div>
+                        <div class="file-title">CALL-2023-0473.aac</div>
+                        <button class="file-menu">
+                            <svg data-feather="more-vertical" width="16" height="16"></svg>
+                        </button>
+                    </div>
+                    <div class="file-body">
+                        <div class="file-metadata">
+                            <div class="file-metadata-item">
+                                <span>Upload Date</span>
+                                <span>Aug 21, 2023 15:30</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>File Size</span>
+                                <span>15.3 MB</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Duration</span>
+                                <span>18:45</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Queue</span>
+                                <span>Standard</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                                <span>Transcription Progress</span>
+                                <span>32%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 32%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-footer">
+                        <div class="file-status">
+                            <svg data-feather="loader" width="12" height="12"></svg>
+                            <span>Processing</span>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-action-btn">
+                                <svg data-feather="pause" width="14" height="14"></svg>
+                            </button>
+                            <button class="file-action-btn">
+                                <svg data-feather="info" width="14" height="14"></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="file-card">
+                    <div class="file-header">
+                        <div class="file-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success);">
+                            <svg data-feather="check" width="16" height="16"></svg>
+                        </div>
+                        <div class="file-title">CALL-2023-0472.aac</div>
+                        <button class="file-menu">
+                            <svg data-feather="more-vertical" width="16" height="16"></svg>
+                        </button>
+                    </div>
+                    <div class="file-body">
+                        <div class="file-metadata">
+                            <div class="file-metadata-item">
+                                <span>Upload Date</span>
+                                <span>Aug 21, 2023 15:22</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>File Size</span>
+                                <span>7.8 MB</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Duration</span>
+                                <span>08:34</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Queue</span>
+                                <span>Priority</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 0.75rem; margin-bottom: 0.25rem;">
+                                <span>Category: </span>
+                                <span style="font-weight: 500;">Account Issues > Login > Password Reset</span>
+                            </div>
+                            <div style="font-size: 0.75rem; margin-bottom: 0.25rem;">
+                                <span>Severity: </span>
+                                <span class="badge badge-warning">Medium</span>
+                            </div>
+                            <div style="font-size: 0.75rem;">
+                                <span>Status: </span>
+                                <span class="badge badge-success">Resolved</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-footer">
+                        <div class="file-status" style="color: var(--success);">
+                            <svg data-feather="check-circle" width="12" height="12"></svg>
+                            <span>Completed</span>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-action-btn">
+                                <svg data-feather="file-text" width="14" height="14"></svg>
+                            </button>
+                            <button class="file-action-btn">
+                                <svg data-feather="info" width="14" height="14"></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="file-card">
+                    <div class="file-header">
+                        <div class="file-icon">
+                            <svg data-feather="mic" width="16" height="16"></svg>
+                        </div>
+                        <div class="file-title">CALL-2023-0474.aac</div>
+                        <button class="file-menu">
+                            <svg data-feather="more-vertical" width="16" height="16"></svg>
+                        </button>
+                    </div>
+                    <div class="file-body">
+                        <div class="file-metadata">
+                            <div class="file-metadata-item">
+                                <span>Upload Date</span>
+                                <span>Aug 21, 2023 15:38</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>File Size</span>
+                                <span>8.7 MB</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Duration</span>
+                                <span>09:12</span>
+                            </div>
+                            <div class="file-metadata-item">
+                                <span>Queue</span>
+                                <span>Priority</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                                <span>Transcription Progress</span>
+                                <span>78%</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 78%;"></div>
+                            </div>

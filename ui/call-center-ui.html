@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CallInsight | Financial Services Analytics</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #a5b4fc;
+            --secondary: #4b5563;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 0.375rem;
+            --radius-sm: 0.25rem;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+        }
+        
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 30;
+        }
+        
+        .sidebar-logo {
+            padding: 1.5rem 1.5rem 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-logo svg {
+            width: 32px;
+            height: 32px;
+            margin-right: 0.5rem;
+        }
+        
+        .sidebar-logo h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            letter-spacing: -0.025em;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background-color: var(--gray-200);
+            margin: 0.5rem 0;
+        }
+        
+        .sidebar-section {
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-group {
+            margin-bottom: 1rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            border-radius: var(--radius);
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+        
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+        }
+        
+        .user-profile {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+        
+        .user-info {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+        
+        .user-role {
+            color: var(--gray-500);
+            font-size: 0.75rem;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            margin-left: 240px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .page-subtitle {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+        
+        /* Actions bar */
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .search-bar {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.5rem 0.5rem 0.5rem 2rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            background-color: var(--gray-50);
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .search-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        
+        .search-bar svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--gray-500);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--gray-100);
+        }
+        
+        /* Dashboard grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            grid-column: span 3;
+        }
+        
+        .stat-card-title {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card-footer {
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .stat-card-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.375rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+        
+        .badge-up {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-down {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        /* Content cards */
+        .content-card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+        
+        .content-card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .content-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .content-card-body {
+            padding: 1.25rem;
+        }
+        
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            color: var(--gray-500);
+            background-color: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background-color: var(--gray-50);
+        }
+        
+        .table-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        .table-info {
+            font-size: 0.875rem;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .pagination-button {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background-color: white;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pagination-button:hover {
+            background-color: var(--gray-100);
+        }
+        
+        .pagination-button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-info {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+        
+        /* Upload modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+        
+        .modal-close:hover {
+            color: var(--gray-700);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+        }
+        
+        .upload-icon {
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            background-color: white;
+            transition: all 0.2s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            outline: none;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            color: var(--gray-900);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Process timeline */
+        .timeline {
+            position: relative;
+            margin: 2rem 0;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--gray-200);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -2.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: var(--primary);
+            border: 2px solid white;
+        }
+        
+        .timeline-content {
+            background-color: var(--gray-50);
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+        
+        .timeline-title {
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .timeline-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        /* Queue management */
+        .queue-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        .queue-card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        
+        .queue-header {
+            background-color: var(--gray-100);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .queue-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .queue-stats {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+        
+        .queue-items {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .queue-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+        }
+        
+        .queue-item:last-child {
+            border-bottom: none;
+        }
+        
+        .queue-item-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .queue-item-meta {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .stat-card {
+                grid-column: span 3;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 68px;
+                overflow: hidden;
+            }
+            
+            .sidebar-logo h1,
+            .nav-link span,
+            .user-info {
+                display: none;
+            }
+            
+            .nav-link svg {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 68px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stat-card {
+                grid-column: span 1;
+            }
+            
+            .queue-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+                <h1>CallInsight</h1>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Overview</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link active">
+                        <svg data-feather="home"></svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="activity"></svg>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Management</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link">
+                        <svg data-feather="upload"></svg>
+                        <span>Uploads</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="list"></svg>
+                        <span>Queues</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="file-text"></svg>
+                        <span>Transcripts</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="pie-chart"></svg>
+                        <span>Reports</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Settings</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link">
+                        <svg data-feather="users"></svg>
+                        <span>Team</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="settings"></svg>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">AM</div>
+                <div class="user-info">
+                    <div class="user-name">Amit Mehta</div>
+                    <div class="user-role">Admin</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                    <div class="page-subtitle">Overview of your call analytics system</div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary">
+                        <svg data-feather="sliders"></svg>
+                        <span>Filters</span>
+                    </button>
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <svg data-feather="upload"></svg>
+                        <span>Upload Calls</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="actions-bar">
+                <div class="search-bar">
+                    <svg data-feather="search"></svg>
+                    <input type="text" placeholder="Search by call ID, agent, or issue...">
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary">
+                        <svg data-feather="calendar"></svg>
+                        <span>Last 7 days</span>
+                    </button>
+                    <button class="btn btn-secondary">
+                        <svg data-feather="download"></svg>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Dashboard Stats -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-card-title">Calls Processed</div>
+                    <div class="stat-card-value">1,247</div>
+                    <div class="stat-card-footer">
+                        <span class="stat-card-badge badge-up">+7.2%</span>
+                        <span>vs last week</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-title">Avg. Processing Time</div>
+                    <div class="stat-card-value">3.4 min</div>
+                    <div class="stat-card-footer">
+                        <span class="stat-card-badge badge-up">+1.5%</span>
+                        <span>vs last week</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-title">Resolution Rate</div>
+                    <div class="stat-card-value">82.5%</div>
+                    <div class="stat-card-footer">
+                        <span class="stat-card-badge badge-up">+3.8%</span>
+                        <span>vs last week</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-title">Critical Issues</div>
+                    <div class="stat-card-value">17</div>
+                    <div class="stat-card-footer">
+                        <span class="stat-card-badge badge-down">-12.3%</span>
+                        <span>vs last week</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Processing Queues -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <div class="content-card-title">Processing Queues</div>
+                    <button class="btn btn-secondary">
+                        <svg data-feather="refresh-cw"></svg>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+                
+                <div class="content-card-body">
+                    <div class="queue-list">
+                        <div class="queue-card">
+                            <div class="queue-header">
+                                <div class="queue-title">Upload Queue</div>
+                                <div class="queue-stats">12 calls pending</div>
+                            </div>
+                            <div class="queue-items">
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0467</div>
+                                    <div class="queue-item-meta">
+                                        <span>10.2 MB</span>
+                                        <span>Uploaded 5 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0468</div>
+                                    <div class="queue-item-meta">
+                                        <span>8.7 MB</span>
+                                        <span>Uploaded 12 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0469</div>
+                                    <div class="queue-item-meta">
+                                        <span>15.3 MB</span>
+                                        <span>Uploaded 18 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0470</div>
+                                    <div class="queue-item-meta">
+                                        <span>6.1 MB</span>
+                                        <span>Uploaded 25 mins ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="queue-card">
+                            <div class="queue-header">
+                                <div class="queue-title">Transcription Queue</div>
+                                <div class="queue-stats">5 calls in process</div>
+                            </div>
+                            <div class="queue-items">
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0462</div>
+                                    <div class="queue-item-meta">
+                                        <span>Progress: 78%</span>
+                                        <span>ETA: 1:24</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0463</div>
+                                    <div class="queue-item-meta">
+                                        <span>Progress: 45%</span>
+                                        <span>ETA: 3:12</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0464</div>
+                                    <div class="queue-item-meta">
+                                        <span>Progress: 23%</span>
+                                        <span>ETA: 5:40</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0465</div>
+                                    <div class="queue-item-meta">
+                                        <span>Progress: 12%</span>
+                                        <span>ETA: 7:15</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0466</div>
+                                    <div class="queue-item-meta">
+                                        <span>Progress: 5%</span>
+                                        <span>ETA: 8:30</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="queue-card">
+                            <div class="queue-header">
+                                <div class="queue-title">Analysis Queue</div>
+                                <div class="queue-stats">8 transcripts pending</div>
+                            </div>
+                            <div class="queue-items">
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0456</div>
+                                    <div class="queue-item-meta">
+                                        <span>AI analysis in progress</span>
+                                        <span>Started 2 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0457</div>
+                                    <div class="queue-item-meta">
+                                        <span>Queued</span>
+                                        <span>Position: 1</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0458</div>
+                                    <div class="queue-item-meta">
+                                        <span>Queued</span>
+                                        <span>Position: 2</span>
+                                    </div>
+                                </div>
+                                <div class="queue-item">
+                                    <div class="queue-item-title">CALL-2023-0459</div>
+                                    <div class="queue-item-meta">
+                                        <span>Queued</span>
+                                        <span>Position: 3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Call Analysis -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <div class="content-card-title">Recent Call Analysis</div>
+                    <div>
+                        <select class="form-control">
+                            <option>All Categories</option>
+                            <option>Account Issues</option>
+                            <option>Transaction Problems</option>
+                            <option>Technical Support</option>
+                            <option>Product Inquiries</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="content-card-body">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Call ID</th>
+                                    <th>Date & Time</th>
+                                    <th>Duration</th>
+                                    <th>Category</th>
+                                    <th>Severity</th>
+                                    <th>Status</th>
+                                    <th>Agent</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>CALL-2023-0452</td>
+                                    <td>Aug 21, 2023 14:35</td>
+                                    <td>08:42</td>
+                                    <td>Account Access > Login Issue > Password Reset</td>
+                                    <td><span class="badge badge-warning">Medium</span></td>
+                                    <td><span class="badge badge-success">Resolved</span></td>
+                                    <td>Raj Sharma</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <svg data-feather="eye" width="14"></svg>
+                                            <span>View</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>CALL-2023-0451</td>
+                                    <td>Aug 21, 2023 13:22</td>
+                                    <td>15:18</td>
+                                    <td>Transactions > Failed Transfer > Technical Error</td>
+                                    <td><span class="badge badge-danger">Critical</span></td>
+                                    <td><span class="badge badge-info">Escalated</span></td>
+                                    <td>Priya Patel</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <svg data-feather="eye" width="14"></svg>
+                                            <span>View</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>CALL-2023-0450</td>
+                                    <td>Aug 21, 2023 11:05</td>
+                                    <td>04:37</td>
+                                    <td>Product Info > Investment Plans > Documentation</td>
+                                    <td><span class="badge badge-info">Low</span></td>
+                                    <td><span class="badge badge-success">Resolved</span></td>
+                                    <td>Amit Kumar</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <svg data-feather="eye" width="14"></svg>
+                                            <span>View</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>CALL-2023-0449</td>
+                                    <td>Aug 21, 2023 10:18</td>
+                                    <td>12:45</td>
+                                    <td>Customer Service > Complaint > Service Delay</td>
+                                    <td><span class="badge badge-warning">Medium</span></td>
+                                    <td><span class="badge badge-warning">Workaround</span></td>
+                                    <td>Sneha Gupta</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <svg data-feather="eye" width="14"></svg>
+                                            <span>View</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>CALL-2023-0448</td>
+                                    <td>Aug 21, 2023 09:47</td>
+                                    <td>06:23</td>
+                                    <td>Technical Support > Mobile App > Feature Request</td>
+                                    <td><span class="badge badge-info">Low</span></td>
+                                    <td><span class="badge badge-danger">Unresolved</span></td>
+                                    <td>Vikram Singh</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <svg data-feather="eye" width="14"></svg>
+                                            <span>View</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="table-pagination">
+                        <div class="table-info">
+                            Showing 1 to 5 of 128 entries
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-button">Previous</button>
+                            <button class="pagination-button active">1</button>
+                            <button class="pagination-button">2</button>
+                            <button class="pagination-button">3</button>
+                            <button class="pagination-button">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upload Modal (hidden by default) -->
+            <div class="modal-overlay" style="display: none;" id="uploadModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="modal-title">Upload Call Recordings</div>
+                        <button class="modal-close" id="closeModal">
+                            <svg data-feather="x"></svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="upload-area" id="dropArea">
+                            <div class="upload-icon">
+                                <svg data-feather="upload-cloud" width="48" height="48"></svg>
+                            </div>
+                            <div class="upload-text">
+                                <strong>Click to upload</strong> or drag and drop
+                            </div>
+                            <div class="upload-hint">
+                                Supports AAC audio files (Max: 50MB)
+                            </div>
+                            <input type="file" id="fileInput" style="display: none;" multiple accept=".aac">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Processing Queue</label>
+                            <select class="form-control">
+                                <option>Standard Queue (Processing time: ~30 mins)</option>
+                                <option>Priority Queue (Processing time: ~10 mins)</option>
+                                <option>Batch Processing (Schedule for off-peak hours)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tags (Optional)</label>
+                            <input type="text" class="form-control" placeholder="E.g., product-inquiry, escalation, hindi">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="cancelUpload">Cancel</button>
+                        <button class="btn btn-primary">Start Upload</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Call Details View (hidden by default) -->
+            <div class="content-card" style="display: none;" id="callDetailView">
+                <div class="content-card-header">
+                    <div class="content-card-title">Call Details: CALL-2023-0451</div>
+                    <button class="btn btn-secondary" id="closeDetailView">
+                        <svg data-feather="x"></svg>
+                        <span>Close</span>
+                    </button>
+                </div>
+                
+                <div class="content-card-body">
+                    <div class="tabs">
+                        <div class="tab active">Overview</div>
+                        <div class="tab">Transcript</div>
+                        <div class="tab">Analysis</div>
+                        <div class="tab">Processing History</div>
+                    </div>
+                    
+                    <div class="dashboard-grid" style="margin-top: 1.5rem;">
+                        <div class="stat-card">
+                            <div class="stat-card-title">Call Duration</div>
+                            <div class="stat-card-value">15:18</div>
+                            <div class="stat-card-footer">
+                                <span>+4:23 longer than average</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-card-title">Customer Sentiment</div>
+                            <div class="stat-card-value">Negative → Neutral</div>
+                            <div class="stat-card-footer">
+                                <span>Improved during call</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-card-title">Issue Severity</div>
+                            <div class="stat-card-value">Critical</div>
+                            <div class="stat-card-footer">
+                                <span>Funds not transferred</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-card-title">Resolution Status</div>
+                            <div class="stat-card-value">Escalated</div>
+                            <div class="stat-card-footer">
+                                <span>To Technical Support Team</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-card" style="margin-top: 1.5rem; box-shadow: none; border: 1px solid var(--gray-200);">
+                        <div class="content-card-header">
+                            <div class="content-card-title">AI-Generated Summary</div>
+                        </div>
+                        <div class="content-card-body">
+                            <p style="margin-bottom: 1rem;">
+                                Customer called regarding a failed funds transfer to their son's account. Multiple attempts resulted in error code E-45632. The customer expressed frustration as this is a time-sensitive transfer for educational expenses.
+                            </p>
+                            <p style="margin-bottom: 1rem;">
+                                Agent verified customer's identity and transaction details. Confirmed the receiving account details were correct. Agent identified the issue as a backend payment gateway integration timeout.
+                            </p>
+                            <p>
+                                Agent provided a workaround by suggesting using NEFT instead of IMPS for this transaction. Issue escalated to the technical team for gateway investigation with high priority. Customer to be contacted with an update within 4 hours.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="content-card" style="margin-top: 1.5rem; box-shadow: none; border: 1px solid var(--gray-200);">
+                        <div class="content-card-header">
+                            <div class="content-card-title">Issue Classification</div>
+                        </div>
+                        <div class="content-card-body">
+                            <div style="display: flex; margin-bottom: 1rem;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Primary Category (L1)</div>
+                                    <div>Transactions</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Secondary Category (L2)</div>
+                                    <div>Failed Transfer</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Tertiary Category (L3)</div>
+                                    <div>Technical Error</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div style="font-weight: 500; margin-bottom: 0.25rem;">Technical Context</div>
+                                <div>Error code E-45632 indicates a timeout in the backend payment gateway integration. This is a known issue affecting approximately 2% of IMPS transfers during peak hours.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-card" style="margin-top: 1.5rem; box-shadow: none; border: 1px solid var(--gray-200);">
+                        <div class="content-card-header">
+                            <div class="content-card-title">Processing Timeline</div>
+                        </div>
+                        <div class="content-card-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">Call Recording Uploaded</div>
+                                        <div>File size: 15.3 MB, Format: AAC</div>
+                                        <div class="timeline-time">Aug 21, 2023 - 13:25</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">Transcription Completed</div>
+                                        <div>Engine: ElevenLabs API, Confidence: 94%</div>
+                                        <div class="timeline-time">Aug 21, 2023 - 13:32</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">AI Analysis Completed</div>
+                                        <div>Engine: OpenAI GPT-4, Model: Financial Services</div>
+                                        <div class="timeline-time">Aug 21, 2023 - 13:36</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">Issue Escalated</div>
+                                        <div>Escalated to: Technical Support Team</div>
+                                        <div class="timeline-time">Aug 21, 2023 - 13:40</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Feather icons
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            
+            // Upload Modal
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadModal = document.getElementById('uploadModal');
+            const closeModal = document.getElementById('closeModal');
+            const cancelUpload = document.getElementById('cancelUpload');
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            
+            uploadBtn.addEventListener('click', function() {
+                uploadModal.style.display = 'flex';
+            });
+            
+            closeModal.addEventListener('click', function() {
+                uploadModal.style.display = 'none';
+            });
+            
+            cancelUpload.addEventListener('click', function() {
+                uploadModal.style.display = 'none';
+            });
+            
+            dropArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // Call Detail View
+            const viewButtons = document.querySelectorAll('.btn-secondary');
+            const callDetailView = document.getElementById('callDetailView');
+            const closeDetailView = document.getElementById('closeDetailView');
+            
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    callDetailView.style.display = 'block';
+                });
+            });
+            
+            closeDetailView.addEventListener('click', function() {
+                callDetailView.style.display = 'none';
+            });
+            
+            // Tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

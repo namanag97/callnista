@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CallInsight | Transcript Chat View</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #a5b4fc;
+            --secondary: #4b5563;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 0.375rem;
+            --radius-sm: 0.25rem;
+            --radius-lg: 0.5rem;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+        }
+        
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 30;
+        }
+        
+        .sidebar-logo {
+            padding: 1.5rem 1.5rem 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-logo svg {
+            width: 32px;
+            height: 32px;
+            margin-right: 0.5rem;
+        }
+        
+        .sidebar-logo h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            letter-spacing: -0.025em;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background-color: var(--gray-200);
+            margin: 0.5rem 0;
+        }
+        
+        .sidebar-section {
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-group {
+            margin-bottom: 1rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            border-radius: var(--radius);
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+        
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+        }
+        
+        .user-profile {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+        
+        .user-info {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+        
+        .user-role {
+            color: var(--gray-500);
+            font-size: 0.75rem;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            margin-left: 240px;
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        /* Recordings list panel */
+        .recordings-panel {
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .recordings-header {
+            background-color: white;
+            border-radius: var(--radius) var(--radius) 0 0;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .recordings-header-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .recordings-search {
+            position: relative;
+        }
+        
+        .recordings-search input {
+            width: 100%;
+            padding: 0.5rem 0.5rem 0.5rem 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-300);
+            font-size: 0.875rem;
+            background-color: var(--gray-50);
+            outline: none;
+        }
+        
+        .recordings-search input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        
+        .recordings-search svg {
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--gray-500);
+        }
+        
+        .recordings-list {
+            flex: 1;
+            background-color: white;
+            border-radius: 0 0 var(--radius) var(--radius);
+            box-shadow: var(--shadow-sm);
+            overflow-y: auto;
+            max-height: calc(100vh - 11rem);
+        }
+        
+        .recording-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .recording-item:hover {
+            background-color: var(--gray-50);
+        }
+        
+        .recording-item.active {
+            background-color: var(--primary-light);
+        }
+        
+        .recording-title {
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            color: var(--gray-800);
+        }
+        
+        .recording-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .recording-category {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+        }
+        
+        .recording-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        
+        .recording-badge {
+            display: inline-block;
+            padding: 0.125rem 0.375rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-info {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+        
+        /* Chat panel */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--gray-900);
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--gray-100);
+        }
+        
+        .btn-icon {
+            padding: 0.5rem;
+            border-radius: 9999px;
+        }
+        
+        .btn-icon svg {
+            margin-right: 0;
+        }
+        
+        .chat-body {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: calc(100vh - 14rem);
+            background-color: var(--gray-50);
+        }
+        
+        .chat-message {
+            display: flex;
+            max-width: 80%;
+        }
+        
+        .chat-message.agent {
+            align-self: flex-start;
+        }
+        
+        .chat-message.customer {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: white;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .chat-message.customer .message-avatar {
+            margin-right: 0;
+            margin-left: 0.75rem;
+        }
+        
+        .agent-avatar {
+            background-color: var(--primary);
+        }
+        
+        .customer-avatar {
+            background-color: var(--secondary);
+        }
+        
+        .message-content {
+            background-color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+        
+        .agent-message {
+            background-color: white;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .agent-message:after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 12px;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 6px solid white;
+        }
+        
+        .customer-message {
+            background-color: var(--primary-light);
+            border: 1px solid var(--primary-light);
+            color: var(--primary-dark);
+        }
+        
+        .customer-message:after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 12px;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 6px solid var(--primary-light);
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        
+        .chat-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background-color: var(--gray-50);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+        
+        .player-control {
+            background-color: white;
+            border: 1px solid var(--gray-300);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .player-progress {
+            flex: 1;
+        }
+        
+        .timeline {
+            width: 100%;
+            height: 4px;
+            background-color: var(--gray-300);
+            border-radius: 9999px;
+            position: relative;
+        }
+        
+        .timeline-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 9999px;
+        }
+        
+        .timeline-handle {
+            width: 12px;
+            height: 12px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+        
+        .player-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Analysis sidebar */
+        .analysis-panel {
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: calc(100vh - 3rem);
+            overflow-y: auto;
+        }
+        
+        .analysis-card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        
+        .analysis-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--gray-800);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .analysis-body {
+            padding: 1rem;
+        }
+        
+        .analysis-item {
+            margin-bottom: 1rem;
+        }
+        
+        .analysis-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .analysis-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .analysis-value {
+            font-size: 0.875rem;
+            color: var(--gray-800);
+        }
+        
+        .accuracy-meter {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .accuracy-bar {
+            flex: 1;
+            height: 8px;
+            background-color: var(--gray-200);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        
+        .accuracy-fill {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 9999px;
+        }
+        
+        .accuracy-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .sentiment-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+        
+        .sentiment-scale {
+            flex: 1;
+            height: 8px;
+            background: linear-gradient(to right, var(--danger), var(--gray-300), var(--success));
+            border-radius: 9999px;
+            margin: 0 0.5rem;
+            position: relative;
+        }
+        
+        .sentiment-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border: 2px solid var(--gray-700);
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .entity-list {
+            margin-top: 0.5rem;
+        }
+        
+        .entity-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .entity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .entity-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .entity-value {
+            font-size: 0.75rem;
+            color: var(--gray-900);
+            font-weight: 500;
+        }
+        
+        .verification-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .accuracy-feedback {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .feedback-btn {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            background-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .feedback-btn.active {
+            background-color: var(--gray-100);
+            border-color: var(--gray-400);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1280px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .recordings-panel, .analysis-panel {
+                width: 100%;
+                max-height: none;
+            }
+            
+            .chat-body {
+                max-height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 68px;
+                overflow: hidden;
+            }
+            
+            .sidebar-logo h1,
+            .nav-link span,
+            .user-info {
+                display: none;
+            }
+            
+            .nav-link svg {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 68px;
+                padding: 1rem;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+                <h1>CallInsight</h1>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Overview</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link">
+                        <svg data-feather="home"></svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="activity"></svg>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Management</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link">
+                        <svg data-feather="upload"></svg>
+                        <span>Uploads</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="list"></svg>
+                        <span>Queues</span>
+                    </a>
+                    <a href="#" class="nav-link active">
+                        <svg data-feather="file-text"></svg>
+                        <span>Transcripts</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="pie-chart"></svg>
+                        <span>Reports</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Settings</div>
+                <div class="nav-group">
+                    <a href="#" class="nav-link">
+                        <svg data-feather="users"></svg>
+                        <span>Team</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <svg data-feather="settings"></svg>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">AM</div>
+                <div class="user-info">
+                    <div class="user-name">Amit Mehta</div>
+                    <div class="user-role">Admin</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Recordings List Panel -->
+            <div class="recordings-panel">
+                <div class="recordings-header">
+                    <div class="recordings-header-title">Call Recordings</div>
+                    <div class="recordings-search">
+                        <svg data-feather="search"></svg>
+                        <input type="text" placeholder="Search recordings">
+                    </div>
+                </div>
+                
+                <div class="recordings-list">
+                    <div class="recording-item active">
+                        <div class="recording-title">CALL-2023-0451</div>
+                        <div class="recording-category">Transactions > Failed Transfer</div>
+                        <div class="recording-meta">
+                            <span>Aug 21, 2023</span>
+                            <span>15:18</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-info">Escalated</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Priya Patel</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-item">
+                        <div class="recording-title">CALL-2023-0450</div>
+                        <div class="recording-category">Product Info > Investment Plans</div>
+                        <div class="recording-meta">
+                            <span>Aug 21, 2023</span>
+                            <span>04:37</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-success">Resolved</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Amit Kumar</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-item">
+                        <div class="recording-title">CALL-2023-0449</div>
+                        <div class="recording-category">Customer Service > Complaint</div>
+                        <div class="recording-meta">
+                            <span>Aug 21, 2023</span>
+                            <span>12:45</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-warning">Workaround</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Sneha Gupta</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-item">
+                        <div class="recording-title">CALL-2023-0448</div>
+                        <div class="recording-category">Technical Support > Mobile App</div>
+                        <div class="recording-meta">
+                            <span>Aug 21, 2023</span>
+                            <span>06:23</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-danger">Unresolved</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Vikram Singh</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-item">
+                        <div class="recording-title">CALL-2023-0447</div>
+                        <div class="recording-category">Account Issues > Login Problems</div>
+                        <div class="recording-meta">
+                            <span>Aug 20, 2023</span>
+                            <span>08:12</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-success">Resolved</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Raj Sharma</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-item">
+                        <div class="recording-title">CALL-2023-0446</div>
+                        <div class="recording-category">Transactions > Fund Transfer</div>
+                        <div class="recording-meta">
+                            <span>Aug 20, 2023</span>
+                            <span>11:45</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-success">Resolved</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Priya Patel</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-item">
+                        <div class="recording-title">CALL-2023-0445</div>
+                        <div class="recording-category">Product Info > Loan Offers</div>
+                        <div class="recording-meta">
+                            <span>Aug 20, 2023</span>
+                            <span>09:32</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-success">Resolved</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Amit Kumar</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recording-item">
+                        <div class="recording-title">CALL-2023-0444</div>
+                        <div class="recording-category">Technical Support > Website Error</div>
+                        <div class="recording-meta">
+                            <span>Aug 20, 2023</span>
+                            <span>14:18</span>
+                        </div>
+                        <div class="recording-status">
+                            <span class="recording-badge badge-info">Escalated</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">Vikram Singh</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Panel -->
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <div class="chat-title">
+                        <div>Call Transcript: CALL-2023-0451</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Transactions > Failed Transfer | Aug 21, 2023 13:22</div>
+                    </div>
+                    
+                    <div class="chat-actions">
+                        <button class="btn btn-secondary">
+                            <svg data-feather="edit-2"></svg>
+                            <span>Edit</span>
+                        </button>
+                        <button class="btn btn-secondary">
+                            <svg data-feather="download"></svg>
+                            <span>Export</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chat-body">
+                    <!-- Audio player -->
+                    <div class="audio-player">
+                        <button class="player-control">
+                            <svg data-feather="play" width="16" height="16"></svg>
+                        </button>
+                        <div class="player-progress">
+                            <div class="timeline">
+                                <div class="timeline-progress" style="width: 35%;"></div>
+                                <div class="timeline-handle" style="left: 35%;"></div>
+                            </div>
+                            <div class="player-time">
+                                <span>05:21 / 15:18</span>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <svg data-feather="volume-1" width="14" height="14" style="color: var(--gray-500);"></svg>
+                                    <svg data-feather="fast-forward" width="14" height="14" style="color: var(--gray-500);"></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chat messages -->
+                    <div class="chat-message agent">
+                        <div class="message-avatar agent-avatar">A</div>
+                        <div class="message-content agent-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--primary-dark);">Agent (Priya)</div>
+                            Thank you for calling ABC Financial Services. My name is Priya. How may I help you today?
+                            <div class="message-time">00:07</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message customer">
+                        <div class="message-avatar customer-avatar">C</div>
+                        <div class="message-content customer-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--gray-700);">Customer</div>
+                            Hi, I've been trying to transfer money to my son's account but the transaction keeps failing. I've tried three times already and each time I get an error message.
+                            <div class="message-time">00:22</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message agent">
+                        <div class="message-avatar agent-avatar">A</div>
+                        <div class="message-content agent-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--primary-dark);">Agent (Priya)</div>
+                            I'm sorry to hear that you're experiencing issues with your transfer. I'd be happy to help you resolve this. Could you please verify your account by providing your customer ID?
+                            <div class="message-time">00:38</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message customer">
+                        <div class="message-avatar customer-avatar">C</div>
+                        <div class="message-content customer-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--gray-700);">Customer</div>
+                            Yes, it's CUST00584.
+                            <div class="message-time">00:45</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message agent">
+                        <div class="message-avatar agent-avatar">A</div>
+                        <div class="message-content agent-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--primary-dark);">Agent (Priya)</div>
+                            Thank you for verifying. Now, could you please tell me when you tried to make this transfer and what error message you received?
+                            <div class="message-time">00:52</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message customer">
+                        <div class="message-avatar customer-avatar">C</div>
+                        <div class="message-content customer-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--gray-700);">Customer</div>
+                            I tried about 20 minutes ago. I'm getting an error code E-45632. This is really frustrating because my son needs this money for his college fees and the deadline is tomorrow. I can't understand why this keeps happening.
+                            <div class="message-time">01:15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message agent">
+                        <div class="message-avatar agent-avatar">A</div>
+                        <div class="message-content agent-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--primary-dark);">Agent (Priya)</div>
+                            I understand your concern, especially since this is for your son's education. The error code you're seeing indicates an issue with our payment gateway integration. We've seen this occasionally during peak hours. Let me check your account and the transaction details to see what's happening.
+                            <div class="message-time">01:45</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message customer">
+                        <div class="message-avatar customer-avatar">C</div>
+                        <div class="message-content customer-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--gray-700);">Customer</div>
+                            Okay, please check. I need to get this resolved today.
+                            <div class="message-time">02:02</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message agent">
+                        <div class="message-avatar agent-avatar">A</div>
+                        <div class="message-content agent-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--primary-dark);">Agent (Priya)</div>
+                            I'm checking your account right now. Could you confirm the amount you're trying to transfer and the recipient's account number? No need to share the full account number, just the last 4 digits for verification.
+                            <div class="message-time">02:35</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-message customer">
+                        <div class="message-avatar customer-avatar">C</div>
+                        <div class="message-content customer-message">
+                            <div style="margin-bottom: 0.25rem; font-weight: 500; font-size: 0.75rem; color: var(--gray-700);">Customer</div>
+                            I'm trying to transfer Rs. 45,000 to account ending with 7832.
+                            <div class="message-time">02:47</div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1rem; font-size: 0.75rem; color: var(--gray-500);">
+                        <span>Showing 10 of 24 messages</span>
+                        <div style="margin-top: 0.5rem;">
+                            <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                <span>Load More</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-footer">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.875rem; font-weight: 500;">Transcript Confidence: 
+                            <span style="color: var(--success);">High (96%)</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-icon btn-secondary">
+                                <svg data-feather="flag" width="14" height="14"></svg>
+                            </button>
+                            <button class="btn btn-icon btn-secondary">
+                                <svg data-feather="thumbs-up" width="14" height="14"></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">
+                        <span>Transcription by ElevenLabs API | Analysis by OpenAI GPT-4</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analysis Panel -->
+            <div class="analysis-panel">
+                <!-- Call Info Card -->
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <span>Call Information</span>
+                        <svg data-feather="info" width="14" height="14" style="color: var(--gray-500);"></svg>
+                    </div>
+                    <div class="analysis-body">
+                        <div class="analysis-item">
+                            <div class="analysis-label">Agent</div>
+                            <div class="analysis-value">Priya Patel</div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-label">Customer ID</div>
+                            <div class="analysis-value">CUST00584</div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-label">Date & Time</div>
+                            <div class="analysis-value">Aug 21, 2023 13:22</div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-label">Duration</div>
+                            <div class="analysis-value">15:18</div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-label">Status</div>
+                            <div class="analysis-value">
+                                <span class="recording-badge badge-info">Escalated</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Transcription Accuracy -->
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <span>Transcription Accuracy</span>
+                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                            <svg data-feather="refresh-cw" width="12" height="12"></svg>
+                            <span>Verify</span>
+                        </button>
+                    </div>
+                    <div class="analysis-body">
+                        <div class="analysis-item">
+                            <div class="analysis-label">Overall Confidence</div>
+                            <div class="analysis-value">96%</div>
+                            <div class="accuracy-meter">
+                                <div class="accuracy-bar">
+                                    <div class="accuracy-fill" style="width: 96%;"></div>
+                                </div>
+                                <div class="accuracy-value">96%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Speaker Diarization</div>
+                            <div class="analysis-value">98%</div>
+                            <div class="accuracy-meter">
+                                <div class="accuracy-bar">
+                                    <div class="accuracy-fill" style="width: 98%;"></div>
+                                </div>
+                                <div class="accuracy-value">98%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Technical Terms</div>
+                            <div class="analysis-value">94%</div>
+                            <div class="accuracy-meter">
+                                <div class="accuracy-bar">
+                                    <div class="accuracy-fill" style="width: 94%;"></div>
+                                </div>
+                                <div class="accuracy-value">94%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Low Confidence Segments</div>
+                            <div class="analysis-value">2 segments</div>
+                            <div style="font-size: 0.75rem; padding: 0.5rem; background-color: var(--gray-50); border-radius: var(--radius); margin-top: 0.5rem; color: var(--gray-600);">
+                                <div style="margin-bottom: 0.25rem;">
+                                    <span style="color: var(--warning);">⚠️</span> "...gateway integration..." (01:45)
+                                </div>
+                                <div>
+                                    <span style="color: var(--warning);">⚠️</span> "...IMPS vs NEFT..." (08:12)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Accuracy Feedback</div>
+                            <div class="accuracy-feedback">
+                                <button class="feedback-btn active">
+                                    <svg data-feather="check-circle" width="12" height="12" style="color: var(--success);"></svg>
+                                    <span>Accurate</span>
+                                </button>
+                                <button class="feedback-btn">
+                                    <svg data-feather="edit" width="12" height="12"></svg>
+                                    <span>Needs Edits</span>
+                                </button>
+                                <button class="feedback-btn">
+                                    <svg data-feather="x-circle" width="12" height="12" style="color: var(--danger);"></svg>
+                                    <span>Poor</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Analysis -->
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <span>AI Analysis</span>
+                        <svg data-feather="cpu" width="14" height="14" style="color: var(--gray-500);"></svg>
+                    </div>
+                    <div class="analysis-body">
+                        <div class="analysis-item">
+                            <div class="analysis-label">Issue Category</div>
+                            <div class="analysis-value">Transactions > Failed Transfer > Technical Error</div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Severity</div>
+                            <div class="analysis-value">
+                                <span class="recording-badge badge-danger">Critical</span>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Customer Sentiment</div>
+                            <div class="analysis-value">Started Negative, Ended Neutral</div>
+                            <div class="sentiment-indicator">
+                                <div style="font-size: 0.75rem; color: var(--danger);">Negative</div>
+                                <div class="sentiment-scale">
+                                    <div class="sentiment-marker" style="left: 65%;"></div>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--success);">Positive</div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Extracted Entities</div>
+                            <div class="entity-list">
+                                <div class="entity-item">
+                                    <div class="entity-label">Error Code</div>
+                                    <div class="entity-value">E-45632</div>
+                                </div>
+                                <div class="entity-item">
+                                    <div class="entity-label">Transfer Amount</div>
+                                    <div class="entity-value">Rs. 45,000</div>
+                                </div>
+                                <div class="entity-item">
+                                    <div class="entity-label">Customer ID</div>
+                                    <div class="entity-value">CUST00584</div>
+                                </div>
+                                <div class="entity-item">
+                                    <div class="entity-label">Account (Last 4)</div>
+                                    <div class="entity-value">7832</div>
+                                </div>
+                                <div class="entity-item">
+                                    <div class="entity-label">Transfer Type</div>
+                                    <div class="entity-value">IMPS</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="analysis-label">Intent Classification</div>
+                            <div class="analysis-value">
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.25rem;">
+                                    <span style="font-size: 0.75rem;">Problem Resolution</span>
+                                    <span style="font-size: 0.75rem; font-weight: 500;">85%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.25rem;">
+                                    <span style="font-size: 0.75rem;">Technical Support</span>
+                                    <span style="font-size: 0.75rem; font-weight: 500;">12%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.25rem;">
+                                    <span style="font-size: 0.75rem;">Complaint</span>
+                                    <span style="font-size: 0.75rem; font-weight: 500;">3%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accuracy Verification -->
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <span>Analysis Verification</span>
+                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                            <svg data-feather="check" width="12" height="12"></svg>
+                            <span>Approve</span>
+                        </button>
+                    </div>
+                    <div class="analysis-body">
+                        <div style="font-size: 0.875rem; margin-bottom: 0.75rem;">
+                            Is the AI analysis accurate and complete?
+                        </div>
+                        
+                        <div class="verification-controls">
+                            <button class="btn btn-secondary" style="flex: 1;">
+                                <svg data-feather="thumbs-up" width="14" height="14"></svg>
+                                <span>Accurate</span>
+                            </button>
+                            <button class="btn btn-secondary" style="flex: 1;">
+                                <svg data-feather="edit-2" width="14" height="14"></svg>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 0.25rem;">Comments (optional)</div>
+                            <textarea style="width: 100%; min-height: 80px; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius); font-family: inherit; font-size: 0.75rem;" placeholder="Add your verification notes here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Feather icons
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            
+            // Audio player functionality
+            const playButton = document.querySelector('.player-control');
+            playButton.addEventListener('click', function() {
+                const icon = this.querySelector('svg');
+                if (icon.dataset.feather === 'play') {
+                    feather.replace(icon, { 'name': 'pause', 'width': 16, 'height': 16 });
+                    // In a real implementation, this would actually play the audio
+                } else {
+                    feather.replace(icon, { 'name': 'play', 'width': 16, 'height': 16 });
+                    // In a real implementation, this would actually pause the audio
+                }
+            });
+            
+            // Timeline scrubbing
+            const timeline = document.querySelector('.timeline');
+            const timelineHandle = document.querySelector('.timeline-handle');
+            const timelineProgress = document.querySelector('.timeline-progress');
+            
+            timeline.addEventListener('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percent = (x / rect.width) * 100;
+                
+                timelineProgress.style.width = percent + '%';
+                timelineHandle.style.left = percent + '%';
+                // In a real implementation, this would seek to the corresponding position in the audio
+            });
+            
+            // Recording item selection
+            const recordingItems = document.querySelectorAll('.recording-item');
+            recordingItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    recordingItems.forEach(ri => ri.classList.remove('active'));
+                    this.classList.add('active');
+                    // In a real implementation, this would load the selected call recording
+                });
+            });
+            
+            // Feedback buttons
+            const feedbackBtns = document.querySelectorAll('.feedback-btn');
+            feedbackBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    feedbackBtns.forEach(fb => fb.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
