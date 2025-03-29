@@ -1,14 +1,14 @@
-<%- include('partials/header', { title: 'Dashboard' }) %>
+<%- include('partials/header', { title: 'Transcripts' }) %>
 
 <div class="page-header">
     <div class="page-title">
-        <h1>Dashboard</h1>
-        <div class="page-subtitle">Overview of your call analytics system</div>
+        <h1>Call Transcripts</h1>
+        <div class="page-subtitle">View and analyze transcribed calls</div>
     </div>
     
     <div class="action-buttons">
         <button class="btn btn-secondary">
-            <svg data-feather="sliders"></svg>
+            <svg data-feather="filter"></svg>
             <span>Filters</span>
         </button>
         <button class="btn btn-primary" id="uploadBtn">
@@ -36,49 +36,16 @@
     </div>
 </div>
 
-<!-- Dashboard Stats -->
-<div class="dashboard-grid">
-    <div class="stat-card">
-        <div class="stat-card-title">Calls Processed</div>
-        <div class="stat-card-value">1,247</div>
-        <div class="stat-card-footer">
-            <span class="stat-card-badge badge-up">+7.2%</span>
-            <span>vs last week</span>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-card-title">Avg. Processing Time</div>
-        <div class="stat-card-value">3.4 min</div>
-        <div class="stat-card-footer">
-            <span class="stat-card-badge badge-up">+1.5%</span>
-            <span>vs last week</span>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-card-title">Resolution Rate</div>
-        <div class="stat-card-value">82.5%</div>
-        <div class="stat-card-footer">
-            <span class="stat-card-badge badge-up">+3.8%</span>
-            <span>vs last week</span>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-card-title">Critical Issues</div>
-        <div class="stat-card-value">17</div>
-        <div class="stat-card-footer">
-            <span class="stat-card-badge badge-down">-12.3%</span>
-            <span>vs last week</span>
-        </div>
-    </div>
+<div class="tabs">
+    <div class="tab active">All Transcripts</div>
+    <div class="tab">High Priority</div>
+    <div class="tab">Unresolved Issues</div>
+    <div class="tab">Needs Review</div>
 </div>
 
-<!-- Recent Call Analysis -->
 <div class="content-card">
     <div class="content-card-header">
-        <div class="content-card-title">Recent Call Analysis</div>
+        <div class="content-card-title">Recent Transcripts</div>
         <div>
             <select class="form-control">
                 <option>All Categories</option>
@@ -106,64 +73,60 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>CALL-2023-0452</td>
-                        <td>Aug 21, 2023 14:35</td>
-                        <td>08:42</td>
-                        <td>Account Access > Login Issue</td>
-                        <td><span class="badge badge-warning">Medium</span></td>
-                        <td><span class="badge badge-success">Resolved</span></td>
-                        <td>Raj Sharma</td>
-                        <td>
-                            <a href="/transcripts/CALL-2023-0452" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                                <svg data-feather="eye" width="14"></svg>
-                                <span>View</span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CALL-2023-0451</td>
-                        <td>Aug 21, 2023 13:22</td>
-                        <td>15:18</td>
-                        <td>Transactions > Failed Transfer</td>
-                        <td><span class="badge badge-danger">Critical</span></td>
-                        <td><span class="badge badge-info">Escalated</span></td>
-                        <td>Priya Patel</td>
-                        <td>
-                            <a href="/transcripts/CALL-2023-0451" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                                <svg data-feather="eye" width="14"></svg>
-                                <span>View</span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CALL-2023-0450</td>
-                        <td>Aug 21, 2023 11:05</td>
-                        <td>04:37</td>
-                        <td>Product Info > Investment Plans</td>
-                        <td><span class="badge badge-info">Low</span></td>
-                        <td><span class="badge badge-success">Resolved</span></td>
-                        <td>Amit Kumar</td>
-                        <td>
-                            <a href="/transcripts/CALL-2023-0450" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                                <svg data-feather="eye" width="14"></svg>
-                                <span>View</span>
-                            </a>
-                        </td>
-                    </tr>
+                    <% if (calls && calls.length > 0) { %>
+                        <% calls.forEach(call => { %>
+                            <tr>
+                                <td><%= call.id %></td>
+                                <td><%= call.date %> <%= call.time %></td>
+                                <td><%= call.duration %></td>
+                                <td><%= call.category %></td>
+                                <td>
+                                    <% if (call.severity === 'Critical') { %>
+                                        <span class="badge badge-danger">Critical</span>
+                                    <% } else if (call.severity === 'Medium') { %>
+                                        <span class="badge badge-warning">Medium</span>
+                                    <% } else { %>
+                                        <span class="badge badge-info">Low</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (call.status === 'Resolved') { %>
+                                        <span class="badge badge-success">Resolved</span>
+                                    <% } else if (call.status === 'Escalated') { %>
+                                        <span class="badge badge-info">Escalated</span>
+                                    <% } else if (call.status === 'Workaround') { %>
+                                        <span class="badge badge-warning">Workaround</span>
+                                    <% } else { %>
+                                        <span class="badge badge-danger">Unresolved</span>
+                                    <% } %>
+                                </td>
+                                <td><%= call.agent %></td>
+                                <td>
+                                    <a href="/transcripts/<%= call.id %>" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                        <svg data-feather="eye" width="14"></svg>
+                                        <span>View</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem;">
+                                No transcript data available. Upload some calls to get started.
+                            </td>
+                        </tr>
+                    <% } %>
                 </tbody>
             </table>
         </div>
         
         <div class="table-pagination">
             <div class="table-info">
-                Showing 1 to 3 of 128 entries
+                Showing 1 to <%= calls ? calls.length : 0 %> of <%= calls ? calls.length : 0 %> entries
             </div>
             <div class="pagination-controls">
                 <button class="pagination-button">Previous</button>
                 <button class="pagination-button active">1</button>
-                <button class="pagination-button">2</button>
-                <button class="pagination-button">3</button>
                 <button class="pagination-button">Next</button>
             </div>
         </div>
@@ -189,7 +152,7 @@
                         <strong>Click to upload</strong> or drag and drop
                     </div>
                     <div class="upload-hint">
-                        Supports AAC audio files (Max: 50MB)
+                        Supports AAC, MP3, and WAV audio files (Max: 50MB)
                     </div>
                     <input type="file" id="fileInput" name="audioFiles" style="display: none;" multiple accept=".aac,.mp3,.wav">
                 </div>

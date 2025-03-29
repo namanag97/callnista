@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
+const indexRoutes = require('./routes/index');
+const uploadsRoutes = require('./routes/uploads');
+const transcriptsRoutes = require('./routes/transcripts');
 
 // Load environment variables
 dotenv.config();
@@ -18,16 +21,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.get('/', (req, res) => {
-  res.render('dashboard', { title: 'Dashboard' });
-});
+app.use('/', indexRoutes);
+app.use('/uploads', uploadsRoutes);
+app.use('/transcripts', transcriptsRoutes);
 
-app.get('/transcripts', (req, res) => {
-  res.render('transcripts', { title: 'Transcripts' });
-});
-
-app.get('/uploads', (req, res) => {
-  res.render('uploads', { title: 'Uploads' });
+// Handle 404
+app.use((req, res) => {
+  res.status(404).render('404', { title: 'Page Not Found' });
 });
 
 // Start server

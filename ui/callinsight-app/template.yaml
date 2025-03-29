@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: CallInsight Application Stack
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    Description: Deployment stage (dev, staging, prod)
+  BucketName:
+    Type: String
+    Default: callinsight-uploads
+    Description: S3 bucket for storing call recordings
+
+Resources:
+  # S3 Bucket for storing call recordings
+  CallRecordingsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${BucketName}-${Stage}
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldObjects
+            Status: Enabled
+            ExpirationInDays: 365
+
+  # IAM Role for EC2 instance
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  # EC2 Instance Profile
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
+  # Security Group for EC2
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for web server
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+
+  # EC2 Instance
+  WebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0c55b159cbfafe1f0  # Amazon Linux 2 AMI (update with the latest AMI in your region)
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      UserData: 
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          # Update packages
+          yum update -y
+          
+          # Install Node.js
+          curl -sL https://rpm.nodesource.com/setup_16.x | bash -
+          yum install -y nodejs
+          
+          # Install Git
+          yum install -y git
+          
+          # Create app directory
+          mkdir -p /var/www/callinsight
+          
+          # Clone app from repository (in a real scenario)
+          # git clone https://github.com/yourusername/callinsight.git /var/www/callinsight
+          
+          # Set environment variables
+          echo "PORT=3000" >> /var/www/callinsight/.env
+          echo "AWS_REGION=${AWS::Region}" >> /var/www/callinsight/.env
+          echo "S3_BUCKET_NAME=${CallRecordingsBucket}" >> /var/www/callinsight/.env
+          
+          # Set permissions
+          chown -R ec2-user:ec2-user /var/www/callinsight
+          
+          # Install PM2 globally
+          npm install pm2 -g
+          
+          # Install app dependencies
+          cd /var/www/callinsight
+          npm install
+          
+          # Start the app with PM2
+          pm2 start app.js --name callinsight
+          pm2 startup
+          pm2 save
+          
+          # Configure Nginx as reverse proxy (future enhancement)
+
+Outputs:
+  WebsiteURL:
+    Description: URL for the CallInsight application
+    Value: !Sub http://${WebServer.PublicDnsName}:3000
+  
+  BucketName:
+    Description: S3 bucket for call recordings
+    Value: !Ref CallRecordingsBucket

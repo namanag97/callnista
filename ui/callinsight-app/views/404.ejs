@@ -1,0 +1,26 @@
+<%- include('partials/header', { title: 'Page Not Found' }) %>
+
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+    </div>
+    
+    <h1 style="font-size: 2rem; font-weight: 700; color: var(--gray-900); margin-bottom: 1rem;">Page Not Found</h1>
+    
+    <p style="font-size: 1rem; color: var(--gray-500); max-width: 500px; margin-bottom: 2rem;">
+        The page you are looking for doesn't exist or has been moved.
+    </p>
+    
+    <div>
+        <a href="/" class="btn btn-primary">
+            <svg data-feather="home" width="16" height="16"></svg>
+            <span>Go to Dashboard</span>
+        </a>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,316 @@
+<%- include('partials/header', { title: 'Uploads' }) %>
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Call Uploads</h1>
+        <div class="page-subtitle">Manage your call recording uploads and processing</div>
+    </div>
+    
+    <div class="action-buttons">
+        <button class="btn btn-secondary">
+            <svg data-feather="settings"></svg>
+            <span>Upload Settings</span>
+        </button>
+        <button class="btn btn-primary" id="uploadBtn">
+            <svg data-feather="upload"></svg>
+            <span>Upload Calls</span>
+        </button>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="content-card-title">Quick Upload</div>
+    </div>
+    <div class="content-card-body">
+        <div class="upload-area" id="dropArea">
+            <div class="upload-icon">
+                <svg data-feather="upload-cloud" width="48" height="48"></svg>
+            </div>
+            <div class="upload-text">
+                <strong>Click to upload</strong> or drag and drop call recordings
+            </div>
+            <div class="upload-hint">
+                Supports AAC, MP3, and WAV audio files (Max: 50MB per file)
+            </div>
+            <input type="file" id="fileInput" style="display: none;" multiple accept=".aac,.mp3,.wav">
+        </div>
+        
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 240px;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Processing Queue</label>
+                <select name="processingQueue" style="width: 100%; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+                    <option value="standard">Standard Queue (Processing time: ~30 mins)</option>
+                    <option value="priority">Priority Queue (Processing time: ~10 mins)</option>
+                    <option value="batch">Batch Processing (Schedule for off-peak hours)</option>
+                </select>
+            </div>
+            
+            <div style="flex: 1; min-width: 240px;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Categories</label>
+                <select name="category" style="width: 100%; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+                    <option value="">All Categories</option>
+                    <option value="account-issues">Account Issues</option>
+                    <option value="transaction-problems">Transaction Problems</option>
+                    <option value="technical-support">Technical Support</option>
+                    <option value="product-inquiries">Product Inquiries</option>
+                </select>
+            </div>
+            
+            <div style="flex: 1; min-width: 240px;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Tags</label>
+                <input type="text" name="tags" placeholder="E.g., product-inquiry, escalation, hindi" style="width: 100%; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="actions-bar">
+    <div class="search-bar">
+        <svg data-feather="search"></svg>
+        <input type="text" placeholder="Search by call ID, date, or status...">
+    </div>
+    
+    <div class="action-buttons">
+        <button class="btn btn-secondary">
+            <svg data-feather="filter"></svg>
+            <span>Filter</span>
+        </button>
+        <button class="btn btn-secondary">
+            <svg data-feather="calendar"></svg>
+            <span>Last 7 days</span>
+        </button>
+    </div>
+</div>
+
+<div class="tabs">
+    <div class="tab active">Recent Uploads</div>
+    <div class="tab">Processing</div>
+    <div class="tab">Completed</div>
+    <div class="tab">Failed</div>
+</div>
+
+<div class="upload-grid">
+    <!-- Recently uploaded calls -->
+    <div class="file-card">
+        <div class="file-header">
+            <div class="file-icon">
+                <svg data-feather="mic" width="16" height="16"></svg>
+            </div>
+            <div class="file-title">CALL-2023-0475.aac</div>
+            <button class="file-menu">
+                <svg data-feather="more-vertical" width="16" height="16"></svg>
+            </button>
+        </div>
+        <div class="file-body">
+            <div class="file-metadata">
+                <div class="file-metadata-item">
+                    <span>Upload Date</span>
+                    <span>Aug 21, 2023 15:42</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>File Size</span>
+                    <span>12.4 MB</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>Duration</span>
+                    <span>14:26</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>Queue</span>
+                    <span>Standard</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                    <span>Transcription Progress</span>
+                    <span>45%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 45%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="file-footer">
+            <div class="file-status">
+                <svg data-feather="loader" width="12" height="12"></svg>
+                <span>Processing</span>
+            </div>
+            <div class="file-actions">
+                <button class="file-action-btn">
+                    <svg data-feather="pause" width="14" height="14"></svg>
+                </button>
+                <button class="file-action-btn">
+                    <svg data-feather="info" width="14" height="14"></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-header">
+            <div class="file-icon">
+                <svg data-feather="mic" width="16" height="16"></svg>
+            </div>
+            <div class="file-title">CALL-2023-0473.aac</div>
+            <button class="file-menu">
+                <svg data-feather="more-vertical" width="16" height="16"></svg>
+            </button>
+        </div>
+        <div class="file-body">
+            <div class="file-metadata">
+                <div class="file-metadata-item">
+                    <span>Upload Date</span>
+                    <span>Aug 21, 2023 15:30</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>File Size</span>
+                    <span>15.3 MB</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>Duration</span>
+                    <span>18:45</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>Queue</span>
+                    <span>Standard</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                    <span>Transcription Progress</span>
+                    <span>32%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 32%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="file-footer">
+            <div class="file-status">
+                <svg data-feather="loader" width="12" height="12"></svg>
+                <span>Processing</span>
+            </div>
+            <div class="file-actions">
+                <button class="file-action-btn">
+                    <svg data-feather="pause" width="14" height="14"></svg>
+                </button>
+                <button class="file-action-btn">
+                    <svg data-feather="info" width="14" height="14"></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="file-card">
+        <div class="file-header">
+            <div class="file-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success);">
+                <svg data-feather="check" width="16" height="16"></svg>
+            </div>
+            <div class="file-title">CALL-2023-0472.aac</div>
+            <button class="file-menu">
+                <svg data-feather="more-vertical" width="16" height="16"></svg>
+            </button>
+        </div>
+        <div class="file-body">
+            <div class="file-metadata">
+                <div class="file-metadata-item">
+                    <span>Upload Date</span>
+                    <span>Aug 21, 2023 15:22</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>File Size</span>
+                    <span>7.8 MB</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>Duration</span>
+                    <span>08:34</span>
+                </div>
+                <div class="file-metadata-item">
+                    <span>Queue</span>
+                    <span>Priority</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1rem;">
+                <div style="font-size: 0.75rem; margin-bottom: 0.25rem;">
+                    <span>Category: </span>
+                    <span style="font-weight: 500;">Account Issues > Login > Password Reset</span>
+                </div>
+                <div style="font-size: 0.75rem; margin-bottom: 0.25rem;">
+                    <span>Severity: </span>
+                    <span class="badge badge-warning">Medium</span>
+                </div>
+                <div style="font-size: 0.75rem;">
+                    <span>Status: </span>
+                    <span class="badge badge-success">Resolved</span>
+                </div>
+            </div>
+        </div>
+        <div class="file-footer">
+            <div class="file-status" style="color: var(--success);">
+                <svg data-feather="check-circle" width="12" height="12"></svg>
+                <span>Completed</span>
+            </div>
+            <div class="file-actions">
+                <a href="/transcripts/CALL-2023-0472" class="file-action-btn">
+                    <svg data-feather="file-text" width="14" height="14"></svg>
+                </a>
+                <button class="file-action-btn">
+                    <svg data-feather="info" width="14" height="14"></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal-overlay" style="display: none;" id="uploadModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Upload Call Recordings</div>
+            <button class="modal-close" id="closeModal">
+                <svg data-feather="x"></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form action="/uploads" method="post" enctype="multipart/form-data">
+                <div class="upload-area" id="dropAreaModal">
+                    <div class="upload-icon">
+                        <svg data-feather="upload-cloud" width="48" height="48"></svg>
+                    </div>
+                    <div class="upload-text">
+                        <strong>Click to upload</strong> or drag and drop
+                    </div>
+                    <div class="upload-hint">
+                        Supports AAC, MP3, and WAV audio files (Max: 50MB)
+                    </div>
+                    <input type="file" id="fileInputModal" name="audioFiles" style="display: none;" multiple accept=".aac,.mp3,.wav">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Processing Queue</label>
+                    <select class="form-control" name="processingQueue">
+                        <option value="standard">Standard Queue (Processing time: ~30 mins)</option>
+                        <option value="priority">Priority Queue (Processing time: ~10 mins)</option>
+                        <option value="batch">Batch Processing (Schedule for off-peak hours)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tags (Optional)</label>
+                    <input type="text" class="form-control" name="tags" placeholder="E.g., product-inquiry, escalation, hindi">
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelUpload">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Start Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
