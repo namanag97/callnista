@@ -1,0 +1,71 @@
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="22"></line>
+        </svg>
+        <h1>CallInsight</h1>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Overview</div>
+        <div class="nav-group">
+            <a href="/" class="nav-link <%= title === 'Dashboard' ? 'active' : '' %>">
+                <svg data-feather="home"></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="/analytics" class="nav-link <%= title === 'Analytics' ? 'active' : '' %>">
+                <svg data-feather="activity"></svg>
+                <span>Analytics</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Management</div>
+        <div class="nav-group">
+            <a href="/uploads" class="nav-link <%= title === 'Uploads' ? 'active' : '' %>">
+                <svg data-feather="upload"></svg>
+                <span>Uploads</span>
+            </a>
+            <a href="/queues" class="nav-link <%= title === 'Queues' ? 'active' : '' %>">
+                <svg data-feather="list"></svg>
+                <span>Queues</span>
+            </a>
+            <a href="/transcripts" class="nav-link <%= title === 'Transcripts' ? 'active' : '' %>">
+                <svg data-feather="file-text"></svg>
+                <span>Transcripts</span>
+            </a>
+            <a href="/reports" class="nav-link <%= title === 'Reports' ? 'active' : '' %>">
+                <svg data-feather="pie-chart"></svg>
+                <span>Reports</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Settings</div>
+        <div class="nav-group">
+            <a href="/team" class="nav-link <%= title === 'Team' ? 'active' : '' %>">
+                <svg data-feather="users"></svg>
+                <span>Team</span>
+            </a>
+            <a href="/settings" class="nav-link <%= title === 'Settings' ? 'active' : '' %>">
+                <svg data-feather="settings"></svg>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="user-profile">
+        <div class="user-avatar">AM</div>
+        <div class="user-info">
+            <div class="user-name">Amit Mehta</div>
+            <div class="user-role">Admin</div>
+        </div>
+    </div>
+</div>
