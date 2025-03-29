@@ -1,0 +1,16 @@
+{
+    "name": "callinsight-scripts",
+    "version": "1.0.0",
+    "description": "Utility scripts for CallInsight",
+    "scripts": {
+      "manage-profiles": "node manage-profiles.js"
+    },
+    "dependencies": {
+      "@aws-sdk/client-dynamodb": "^3.777.0",
+      "@aws-sdk/lib-dynamodb": "^3.778.0",
+      "chalk": "^4.1.2",
+      "commander": "^8.3.0",
+      "inquirer": "^8.2.5"
+    }
+  }
+  

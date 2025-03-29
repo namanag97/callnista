@@ -24,6 +24,14 @@
             "IntervalSeconds": 2,
             "MaxAttempts": 3,
             "BackoffRate": 2.0
+          },
+          {
+            "ErrorEquals": [
+              "TranscriptionServiceUnavailableError"
+            ],
+            "IntervalSeconds": 5,
+            "MaxAttempts": 5,
+            "BackoffRate": 2.0
           }
         ],
         "Catch": [
@@ -31,10 +39,21 @@
             "ErrorEquals": [ "States.ALL" ],
             "Comment": "Catch all transcription errors",
             "ResultPath": "$.errorInfo",
-            "Next": "MarkFailed"
+            "Next": "HandleTranscriptionFailure"
           }
         ],
         "Next": "AnalyzeTranscript"
+      },
+      "HandleTranscriptionFailure": {
+        "Type": "Task",
+        "Comment": "Update status to TranscriptionFailed",
+        "Resource": "${LambdaUpdateStatusArn}",
+        "Parameters": {
+          "call_id.$": "$.call_id",
+          "status": "TranscriptionFailed",
+          "error.$": "$.errorInfo"
+        },
+        "End": true
       },
       "AnalyzeTranscript": {
         "Type": "Task",
@@ -45,7 +64,7 @@
           "profile_id.$": "$.profile_id"
         },
         "ResultPath": "$.AnalysisOutput",
-         "Retry": [
+        "Retry": [
           {
             "ErrorEquals": [
               "Lambda.ServiceException",
@@ -57,6 +76,14 @@
             "IntervalSeconds": 3,
             "MaxAttempts": 3,
             "BackoffRate": 2.0
+          },
+          {
+            "ErrorEquals": [
+              "AnalysisServiceUnavailableError"
+            ],
+            "IntervalSeconds": 5,
+            "MaxAttempts": 3,
+            "BackoffRate": 1.5
           }
         ],
         "Catch": [
@@ -64,20 +91,33 @@
             "ErrorEquals": [ "States.ALL" ],
             "Comment": "Catch all analysis errors",
             "ResultPath": "$.errorInfo",
-            "Next": "MarkFailed"
+            "Next": "HandleAnalysisFailure"
           }
         ],
-        "Next": "MarkCompleted"
+        "Next": "UpdateFinalStatus"
       },
-      "MarkCompleted": {
-        "Type": "Succeed",
-        "Comment": "Workflow completed successfully (status updated by Lambda_Analyze)"
+      "HandleAnalysisFailure": {
+        "Type": "Task",
+        "Comment": "Update status to AnalysisFailed",
+        "Resource": "${LambdaUpdateStatusArn}",
+        "Parameters": {
+          "call_id.$": "$.call_id",
+          "status": "AnalysisFailed",
+          "error.$": "$.errorInfo"
+        },
+        "End": true
       },
-      "MarkFailed": {
-        "Type": "Fail",
-        "Comment": "Workflow failed (status updated by failing Lambda)",
-        "CausePath": "$.errorInfo.Cause",
-        "ErrorPath": "$.errorInfo.Error"
+      "UpdateFinalStatus": {
+        "Type": "Task",
+        "Comment": "Update status to Completed",
+        "Resource": "${LambdaUpdateStatusArn}",
+        "Parameters": {
+          "call_id.$": "$.call_id",
+          "status": "Completed",
+          "transcription_id.$": "$.TranscriptionOutput.call_id",
+          "analysis_id.$": "$.AnalysisOutput.call_id"
+        },
+        "End": true
       }
     }
-  }
+}
