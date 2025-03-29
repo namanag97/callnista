@@ -10,6 +10,11 @@
 
 ### Changed
 - Updated infrastructure template configuration in `template.yaml`
+- Improved sidebar UI with:
+  - Enhanced responsive design for mobile and tablet
+  - Better icon rendering and alignment
+  - Logout functionality in user profile
+  - Fixed styling conflicts between multiple sidebar versions
 
 ### Infrastructure
 - AWS SAM template updates for improved Lambda function configurations
