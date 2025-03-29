@@ -1,0 +1,1341 @@
+import React, { useState } from 'react';
+import { 
+  Activity, Home, Upload, List, FileText, PieChart, Users, Settings, Search, Calendar, 
+  Download, Sliders, RefreshCw, Eye, UploadCloud, Filter, CheckCircle, AlertTriangle, 
+  Info, Mic, Pause, MoreVertical, X, Play, ChevronRight, ChevronLeft, Edit2, 
+  Volume1, FastForward, Flag, ThumbsUp, Check, Loader, Server 
+} from 'lucide-react';
+
+const CallInsightApp = () => {
+  const [activePage, setActivePage] = useState('dashboard');
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCallDetail, setShowCallDetail] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview'); // For Call Detail View
+  const [activeCallTab, setActiveCallTab] = useState('transcript'); // For Transcript page view (if needed, currently unused)
+  const [activeUploadTab, setActiveUploadTab] = useState('recent'); // For Uploads page tabs
+
+  const handleNavigate = (page) => {
+    setActivePage(page);
+    setShowCallDetail(false); // Close detail view when navigating pages
+  };
+
+  const handleViewCall = () => {
+    // In a real app, you'd pass the call ID here
+    setActiveTab('overview'); // Reset detail tab to overview when opening
+    setShowCallDetail(true);
+  };
+
+  const handleCloseCallDetail = () => {
+    setShowCallDetail(false);
+  };
+
+  // Placeholder Content for other pages
+  const PlaceholderContent = ({ title }) => (
+    <div>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-1">{title}</h1>
+      <div className="text-sm text-gray-500">Content for {title} page goes here.</div>
+      <div className="mt-6 p-8 bg-white rounded-md shadow-sm border border-gray-200 text-center text-gray-500">
+        Placeholder for {title} Interface
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 text-gray-800">
+      {/* Sidebar */}
+      <div className="w-60 bg-white border-r border-gray-200 fixed h-screen z-30 flex flex-col">
+        <div className="p-6 pb-4 flex items-center">
+          {/* Using Mic icon instead of custom SVG for consistency */}
+          <Mic className="w-8 h-8 mr-2 text-indigo-600" strokeWidth={1.5} />
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">CallInsight</h1>
+        </div>
+
+        <div className="h-px bg-gray-200 my-2"></div>
+
+        {/* Sidebar Navigation */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-6 py-3">
+            <div className="text-xs font-semibold uppercase text-gray-500 tracking-wider mb-2">Overview</div>
+            <div className="mb-4">
+              <a
+                onClick={() => handleNavigate('dashboard')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'dashboard' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <Home className="w-4 h-4 mr-3" />
+                <span>Dashboard</span>
+              </a>
+              <a
+                onClick={() => handleNavigate('analytics')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'analytics' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <Activity className="w-4 h-4 mr-3" />
+                <span>Analytics</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="px-6 py-3">
+            <div className="text-xs font-semibold uppercase text-gray-500 tracking-wider mb-2">Management</div>
+            <div className="mb-4">
+              <a
+                onClick={() => handleNavigate('uploads')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'uploads' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <Upload className="w-4 h-4 mr-3" />
+                <span>Uploads</span>
+              </a>
+              <a
+                onClick={() => handleNavigate('queues')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'queues' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <List className="w-4 h-4 mr-3" />
+                <span>Queues</span>
+              </a>
+              <a
+                onClick={() => handleNavigate('transcripts')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'transcripts' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <FileText className="w-4 h-4 mr-3" />
+                <span>Transcripts</span>
+              </a>
+              <a
+                onClick={() => handleNavigate('reports')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'reports' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <PieChart className="w-4 h-4 mr-3" />
+                <span>Reports</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="px-6 py-3">
+            <div className="text-xs font-semibold uppercase text-gray-500 tracking-wider mb-2">Settings</div>
+            <div className="mb-4">
+              <a
+                onClick={() => handleNavigate('team')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'team' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <Users className="w-4 h-4 mr-3" />
+                <span>Team</span>
+              </a>
+              <a
+                onClick={() => handleNavigate('settings')}
+                className={`flex items-center px-3 py-2 text-sm rounded-md transition-all mb-1 cursor-pointer ${activePage === 'settings' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+              >
+                <Settings className="w-4 h-4 mr-3" />
+                <span>Settings</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-auto p-6 border-t border-gray-200 flex items-center">
+          <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold mr-3 flex-shrink-0">AM</div>
+          <div className="text-sm">
+            <div className="font-medium text-gray-900">Amit Mehta</div>
+            <div className="text-xs text-gray-500">Admin</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 ml-60 p-6 overflow-y-auto">
+        
+        {/* Conditionally render Call Detail View *instead* of page content */}
+        {showCallDetail ? (
+           <div className="bg-white rounded-md shadow-sm">
+             <div className="flex justify-between items-center p-4 border-b border-gray-200">
+               <div>
+                 {/* TODO: Pass actual Call ID */}
+                 <div className="font-semibold text-gray-900 text-lg">Call Details: CALL-2023-0451</div> 
+               </div>
+               <button
+                 className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-all"
+                 onClick={handleCloseCallDetail}
+               >
+                 <X className="w-4 h-4 mr-2" />
+                 <span>Close</span>
+               </button>
+             </div>
+ 
+             <div className="p-5">
+               <div className="flex border-b border-gray-200 mb-4">
+                 <div
+                   className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeTab === 'overview' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900'}`}
+                   onClick={() => setActiveTab('overview')}
+                 >
+                   Overview
+                 </div>
+                 <div
+                   className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeTab === 'transcript' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900'}`}
+                   onClick={() => setActiveTab('transcript')}
+                 >
+                   Transcript
+                 </div>
+                 <div
+                   className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeTab === 'analysis' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900'}`}
+                   onClick={() => setActiveTab('analysis')}
+                 >
+                   Analysis
+                 </div>
+                 <div
+                   className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeTab === 'history' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900'}`}
+                   onClick={() => setActiveTab('history')}
+                 >
+                   Processing History
+                 </div>
+               </div>
+ 
+               {/* Overview Tab Content */}
+               {activeTab === 'overview' && (
+                 <div>
+                   <div className="grid grid-cols-4 gap-4 mb-6">
+                     <div className="bg-gray-50 p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="text-sm text-gray-500 mb-2">Call Duration</div>
+                       <div className="text-xl font-semibold text-gray-900 mb-2">15:18</div>
+                       <div className="text-xs text-gray-500">+4:23 longer than average</div>
+                     </div>
+                     <div className="bg-gray-50 p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="text-sm text-gray-500 mb-2">Customer Sentiment</div>
+                       <div className="text-xl font-semibold text-gray-900 mb-2">Negative → Neutral</div>
+                       <div className="text-xs text-gray-500">Improved during call</div>
+                     </div>
+                     <div className="bg-gray-50 p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="text-sm text-gray-500 mb-2">Issue Severity</div>
+                       <div className="text-xl font-semibold text-gray-900 mb-2">Critical</div>
+                       <div className="text-xs text-gray-500">Funds not transferred</div>
+                     </div>
+                     <div className="bg-gray-50 p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="text-sm text-gray-500 mb-2">Resolution Status</div>
+                       <div className="text-xl font-semibold text-gray-900 mb-2">Escalated</div>
+                       <div className="text-xs text-gray-500">To Technical Support Team</div>
+                     </div>
+                   </div>
+ 
+                   <div className="bg-white border border-gray-200 rounded-md mb-6">
+                     <div className="p-4 border-b border-gray-200 font-semibold text-gray-900">
+                       AI-Generated Summary
+                     </div>
+                     <div className="p-5">
+                       <p className="mb-4 text-sm text-gray-700">
+                         Customer called regarding a failed funds transfer to their son's account. Multiple attempts resulted in error code E-45632. The customer expressed frustration as this is a time-sensitive transfer for educational expenses.
+                       </p>
+                       <p className="mb-4 text-sm text-gray-700">
+                         Agent verified customer's identity and transaction details. Confirmed the receiving account details were correct. Agent identified the issue as a backend payment gateway integration timeout.
+                       </p>
+                       <p className="text-sm text-gray-700">
+                         Agent provided a workaround by suggesting using NEFT instead of IMPS for this transaction. Issue escalated to the technical team for gateway investigation with high priority. Customer to be contacted with an update within 4 hours.
+                       </p>
+                     </div>
+                   </div>
+ 
+                   <div className="bg-white border border-gray-200 rounded-md mb-6">
+                     <div className="p-4 border-b border-gray-200 font-semibold text-gray-900">
+                       Issue Classification
+                     </div>
+                     <div className="p-5">
+                       <div className="flex mb-4">
+                         <div className="flex-1">
+                           <div className="font-medium text-gray-700 mb-1 text-sm">Primary Category (L1)</div>
+                           <div className="text-sm">Transactions</div>
+                         </div>
+                         <div className="flex-1">
+                           <div className="font-medium text-gray-700 mb-1 text-sm">Secondary Category (L2)</div>
+                           <div className="text-sm">Failed Transfer</div>
+                         </div>
+                         <div className="flex-1">
+                           <div className="font-medium text-gray-700 mb-1 text-sm">Tertiary Category (L3)</div>
+                           <div className="text-sm">Technical Error</div>
+                         </div>
+                       </div>
+                       <div>
+                         <div className="font-medium text-gray-700 mb-1 text-sm">Technical Context</div>
+                         <div className="text-sm text-gray-700">
+                           Error code E-45632 indicates a timeout in the backend payment gateway integration. This is a known issue affecting approximately 2% of IMPS transfers during peak hours.
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+ 
+                 </div>
+               )}
+ 
+               {/* Transcript Tab Content */}
+               {activeTab === 'transcript' && (
+                 <div className="flex gap-6">
+                   {/* Right side: Chat/transcript view */}
+                   <div className="flex-1 bg-white rounded-md flex flex-col overflow-hidden">
+                      {/* Removed borders and redundant header inside tab */}
+                     <div className="p-4 flex-1 bg-gray-50 overflow-y-auto flex flex-col gap-4 max-h-[60vh]"> {/* Added max height */}
+                       {/* Audio player */}
+                       <div className="sticky top-0 z-10 flex items-center gap-2 p-3 bg-gray-100 border border-gray-200 rounded-md"> {/* Made sticky */}
+                         <button className="bg-white border border-gray-300 w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 hover:bg-gray-100">
+                           <Play className="w-4 h-4" />
+                           {/* <Pause className="w-4 h-4 hidden" /> Add logic for play/pause */}
+                         </button>
+                         <div className="flex-1">
+                           <div className="relative w-full h-1 bg-gray-300 rounded-full overflow-hidden cursor-pointer">
+                             {/* TODO: Update width dynamically */}
+                             <div className="absolute left-0 top-0 h-full bg-indigo-600 rounded-full" style={{ width: '35%' }}></div>
+                             <div className="absolute left-[35%] top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-indigo-600 rounded-full ring-2 ring-white"></div>
+                           </div>
+                           <div className="flex justify-between text-xs text-gray-500 mt-1">
+                             {/* TODO: Update time dynamically */}
+                             <span>05:21 / 15:18</span> 
+                             <div className="flex gap-2">
+                               <Volume1 className="w-3.5 h-3.5 text-gray-500 cursor-pointer hover:text-gray-700" />
+                               <FastForward className="w-3.5 h-3.5 text-gray-500 cursor-pointer hover:text-gray-700" />
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+ 
+                       {/* Chat messages */}
+                       <div className="flex max-w-[80%] self-start">
+                         <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold mr-3 flex-shrink-0">A</div>
+                         <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 relative">
+                           <div className="font-medium text-xs text-indigo-700 mb-1">Agent (Priya)</div>
+                           <div className="text-sm">Thank you for calling ABC Financial Services. My name is Priya. How may I help you today?</div>
+                           <div className="text-xs text-gray-500 text-right mt-1">00:07</div>
+                         </div>
+                       </div>
+ 
+                       <div className="flex max-w-[80%] self-end flex-row-reverse">
+                         <div className="w-9 h-9 rounded-full bg-gray-600 text-white flex items-center justify-center font-semibold ml-3 flex-shrink-0">C</div>
+                         <div className="bg-indigo-50 p-3 rounded-lg shadow-sm border border-indigo-100 text-indigo-800 relative">
+                           <div className="font-medium text-xs text-gray-700 mb-1">Customer</div>
+                           <div className="text-sm">Hi, I've been trying to transfer money to my son's account but the transaction keeps failing. I've tried three times already and each time I get an error message.</div>
+                           <div className="text-xs text-gray-500 text-right mt-1">00:22</div>
+                         </div>
+                       </div>
+                       
+                       {/* Add more messages here... */}
+                        <div className="flex max-w-[80%] self-start">
+                          <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold mr-3 flex-shrink-0">A</div>
+                          <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 relative">
+                            <div className="font-medium text-xs text-indigo-700 mb-1">Agent (Priya)</div>
+                            <div className="text-sm">I'm sorry to hear that you're experiencing issues with your transfer. I'd be happy to help you resolve this. Could you please verify your account by providing your customer ID?</div>
+                            <div className="text-xs text-gray-500 text-right mt-1">00:38</div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex max-w-[80%] self-end flex-row-reverse">
+                          <div className="w-9 h-9 rounded-full bg-gray-600 text-white flex items-center justify-center font-semibold ml-3 flex-shrink-0">C</div>
+                          <div className="bg-indigo-50 p-3 rounded-lg shadow-sm border border-indigo-100 text-indigo-800 relative">
+                            <div className="font-medium text-xs text-gray-700 mb-1">Customer</div>
+                            <div className="text-sm">Yes, it's CUST00584.</div>
+                            <div className="text-xs text-gray-500 text-right mt-1">00:45</div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex max-w-[80%] self-start">
+                          <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold mr-3 flex-shrink-0">A</div>
+                          <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 relative">
+                            <div className="font-medium text-xs text-indigo-700 mb-1">Agent (Priya)</div>
+                            <div className="text-sm">Thank you for verifying. Now, could you please tell me when you tried to make this transfer and what error message you received?</div>
+                            <div className="text-xs text-gray-500 text-right mt-1">00:52</div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex max-w-[80%] self-end flex-row-reverse">
+                          <div className="w-9 h-9 rounded-full bg-gray-600 text-white flex items-center justify-center font-semibold ml-3 flex-shrink-0">C</div>
+                          <div className="bg-indigo-50 p-3 rounded-lg shadow-sm border border-indigo-100 text-indigo-800 relative">
+                            <div className="font-medium text-xs text-gray-700 mb-1">Customer</div>
+                            <div className="text-sm">I tried about 20 minutes ago. I'm getting an error code E-45632. This is really frustrating because my son needs this money for his college fees and the deadline is tomorrow. I can't understand why this keeps happening.</div>
+                            <div className="text-xs text-gray-500 text-right mt-1">01:15</div>
+                          </div>
+                        </div>
+ 
+                       <div className="text-center py-2 text-xs text-gray-500">
+                         <span>Showing 6 of 24 messages</span> {/* TODO: Update dynamically */}
+                         <div className="mt-2">
+                           <button className="px-3 py-1 bg-white border border-gray-300 rounded-md text-xs text-gray-700 hover:bg-gray-100 transition-all">
+                             Load More
+                           </button>
+                         </div>
+                       </div>
+                     </div>
+ 
+                     <div className="border-t border-gray-200 p-4 bg-white"> {/* Moved footer outside scroll */}
+                       <div className="flex justify-between items-center mb-2">
+                         <div className="text-sm font-medium">
+                           Transcript Confidence:
+                           <span className="text-green-600 ml-1">High (96%)</span> {/* TODO: Update dynamically */}
+                         </div>
+                         <div className="flex gap-2">
+                            <button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-all">
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                <span>Edit</span>
+                            </button>
+                            <button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-all">
+                                <Download className="w-4 h-4 mr-2" />
+                                <span>Export</span>
+                            </button>
+                           <button title="Flag Issue" className="p-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100">
+                             <Flag className="w-3.5 h-3.5" />
+                           </button>
+                           <button title="Mark as Accurate" className="p-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100">
+                             <ThumbsUp className="w-3.5 h-3.5" />
+                           </button>
+                         </div>
+                       </div>
+                       <div className="text-xs text-gray-500">
+                         Transcription by ElevenLabs API | Analysis by OpenAI GPT-4 {/* TODO: Update dynamically */}
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               )}
+ 
+               {/* Analysis Tab Content */}
+               {activeTab === 'analysis' && (
+                 <div className="flex gap-6">
+                   {/* Main analysis content */}
+                   <div className="flex-1">
+                     <div className="grid grid-cols-3 gap-4 mb-6">
+                       <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+                         <div className="text-sm text-gray-500 mb-2">Sentiment Analysis</div>
+                          <div className="text-xl font-semibold text-gray-900 mb-2">Negative → Neutral</div>
+                          <div className="flex items-center gap-1 mt-3">
+                            <div className="text-xs text-red-600">Negative</div>
+                            <div className="flex-1 h-2 rounded-full bg-gradient-to-r from-red-500 via-gray-300 to-green-500 mx-2 relative">
+                              <div className="absolute w-3 h-3 bg-white border-2 border-gray-700 rounded-full top-1/2 transform -translate-y-1/2" style={{ left: '65%' }}></div>
+                            </div>
+                            <div className="text-xs text-green-600">Positive</div>
+                          </div>
+                       </div>
+                       <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+                         <div className="text-sm text-gray-500 mb-2">Issue Category</div>
+                         <div className="text-base font-semibold text-gray-900 mb-1">Transactions</div>
+                         <div className="text-sm text-gray-700 mb-1">Failed Transfer</div>
+                         <div className="text-sm text-gray-700">Technical Error</div>
+                         <div className="mt-2 pt-2 border-t border-gray-200">
+                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Critical</span>
+                         </div>
+                       </div>
+                       <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+                         <div className="text-sm text-gray-500 mb-2">Compliance Check</div>
+                         <div className="text-xl font-semibold text-green-600 mb-2">Passed</div>
+                         <div className="text-sm text-gray-700 space-y-1">
+                           <div className="flex items-center gap-1">
+                             <CheckCircle className="w-4 h-4 text-green-600" />
+                             <span>Identity verification</span>
+                           </div>
+                           <div className="flex items-center gap-1">
+                             <CheckCircle className="w-4 h-4 text-green-600" />
+                             <span>Security protocols</span>
+                           </div>
+                           <div className="flex items-center gap-1">
+                             <CheckCircle className="w-4 h-4 text-green-600" />
+                             <span>Disclosure requirements</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+ 
+                     <div className="bg-white border border-gray-200 rounded-md mb-6">
+                       <div className="p-4 border-b border-gray-200 font-semibold text-gray-900">
+                         Key Entities Extracted
+                       </div>
+                       <div className="p-5">
+                         <div className="grid grid-cols-3 gap-4">
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Error Code</div>
+                             <div className="font-medium">E-45632</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Transfer Amount</div>
+                             <div className="font-medium">Rs. 45,000</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Customer ID</div>
+                             <div className="font-medium">CUST00584</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Account (Last 4)</div>
+                             <div className="font-medium">7832</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Transfer Type</div>
+                             <div className="font-medium">IMPS</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Purpose</div>
+                             <div className="font-medium">Education Fees</div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+ 
+                     <div className="bg-white border border-gray-200 rounded-md mb-6">
+                       <div className="p-4 border-b border-gray-200 font-semibold text-gray-900">
+                         Agent Performance
+                       </div>
+                       <div className="p-5">
+                         <div className="grid grid-cols-4 gap-4 mb-4">
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Agent Name</div>
+                             <div className="font-medium">Priya Patel</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Response Time</div>
+                             <div className="font-medium">14 seconds</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Accuracy</div>
+                             <div className="font-medium">92%</div>
+                           </div>
+                           <div className="text-sm">
+                             <div className="text-gray-500 mb-1">Overall Rating</div>
+                             <div className="font-medium">4.5/5</div>
+                           </div>
+                         </div>
+ 
+                         <div className="mb-4">
+                           <div className="text-sm font-medium text-gray-700 mb-2">Problem Solving Skills</div>
+                           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                             <div className="h-full bg-green-600 rounded-full" style={{ width: '85%' }}></div>
+                           </div>
+                           <div className="flex justify-between text-xs text-gray-500 mt-1">
+                             <span>Poor</span>
+                             <span>85%</span>
+                             <span>Excellent</span>
+                           </div>
+                         </div>
+ 
+                         <div className="mb-4">
+                           <div className="text-sm font-medium text-gray-700 mb-2">Communication Clarity</div>
+                           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                             <div className="h-full bg-green-600 rounded-full" style={{ width: '90%' }}></div>
+                           </div>
+                           <div className="flex justify-between text-xs text-gray-500 mt-1">
+                             <span>Poor</span>
+                             <span>90%</span>
+                             <span>Excellent</span>
+                           </div>
+                         </div>
+ 
+                         <div>
+                           <div className="text-sm font-medium text-gray-700 mb-2">Empathy</div>
+                           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                             <div className="h-full bg-green-600 rounded-full" style={{ width: '75%' }}></div>
+                           </div>
+                           <div className="flex justify-between text-xs text-gray-500 mt-1">
+                             <span>Poor</span>
+                             <span>75%</span>
+                             <span>Excellent</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+ 
+                   {/* Sidebar for verification */}
+                   <div className="w-80 flex-shrink-0 flex flex-col gap-4">
+                     <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="flex justify-between items-center pb-3 border-b border-gray-200 mb-3">
+                         <div className="font-medium text-gray-900">Call Information</div>
+                         <Info className="w-4 h-4 text-gray-500" />
+                       </div>
+                       <div className="space-y-3">
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Agent</div>
+                           <div className="text-sm">Priya Patel</div>
+                         </div>
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Customer ID</div>
+                           <div className="text-sm">CUST00584</div>
+                         </div>
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Date & Time</div>
+                           <div className="text-sm">Aug 21, 2023 13:22</div>
+                         </div>
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Duration</div>
+                           <div className="text-sm">15:18</div>
+                         </div>
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Status</div>
+                           <div className="text-sm">
+                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Escalated</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+ 
+                     <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="flex justify-between items-center pb-3 border-b border-gray-200 mb-3">
+                         <div className="font-medium text-gray-900">Transcription Accuracy</div>
+                         <button className="flex items-center text-xs px-2 py-1 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                           <RefreshCw className="w-3 h-3 mr-1" />
+                           <span>Verify</span>
+                         </button>
+                       </div>
+                       <div className="space-y-3">
+                         <div>
+                           <div className="flex justify-between mb-1">
+                             <div className="text-xs text-gray-500">Overall Confidence</div>
+                             <div className="text-sm font-semibold text-green-600">96%</div>
+                           </div>
+                           <div className="relative w-full h-2 bg-gray-200 rounded-full">
+                             <div className="absolute left-0 top-0 h-full bg-green-600 rounded-full" style={{ width: '96%' }}></div>
+                           </div>
+                         </div>
+                         <div>
+                           <div className="flex justify-between mb-1">
+                             <div className="text-xs text-gray-500">Speaker Diarization</div>
+                             <div className="text-sm font-semibold text-green-600">98%</div>
+                           </div>
+                           <div className="relative w-full h-2 bg-gray-200 rounded-full">
+                             <div className="absolute left-0 top-0 h-full bg-green-600 rounded-full" style={{ width: '98%' }}></div>
+                           </div>
+                         </div>
+                         <div>
+                           <div className="flex justify-between mb-1">
+                             <div className="text-xs text-gray-500">Technical Terms</div>
+                             <div className="text-sm font-semibold text-green-600">94%</div>
+                           </div>
+                           <div className="relative w-full h-2 bg-gray-200 rounded-full">
+                             <div className="absolute left-0 top-0 h-full bg-green-600 rounded-full" style={{ width: '94%' }}></div>
+                           </div>
+                         </div>
+ 
+                         <div>
+                           <div className="text-xs text-gray-500 mb-1">Low Confidence Segments</div>
+                           <div className="text-xs p-2 bg-gray-50 rounded-md border border-gray-200">
+                             <div className="mb-1 flex gap-1">
+                               <AlertTriangle className="w-3 h-3 text-yellow-600 flex-shrink-0 mt-0.5" />
+                               <span>"...gateway integration..." (01:45)</span>
+                             </div>
+                             <div className="flex gap-1">
+                               <AlertTriangle className="w-3 h-3 text-yellow-600 flex-shrink-0 mt-0.5" />
+                               <span>"...IMPS vs NEFT..." (08:12)</span>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+ 
+                     <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="flex justify-between items-center pb-3 border-b border-gray-200 mb-3">
+                         <div className="font-medium text-gray-900">AI Analysis</div>
+                         <Server className="w-4 h-4 text-gray-500" />
+                       </div>
+                       <div className="space-y-3">
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Issue Category</div>
+                           <div className="text-sm">Transactions > Failed Transfer > Technical Error</div>
+                         </div>
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Severity</div>
+                           <div className="text-sm">
+                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Critical</span>
+                           </div>
+                         </div>
+                         <div className="flex flex-col">
+                           <div className="text-xs text-gray-500">Intent Classification</div>
+                           <div className="flex justify-between text-xs mt-1">
+                             <span>Problem Resolution</span>
+                             <span className="font-medium">85%</span>
+                           </div>
+                           <div className="flex justify-between text-xs mt-1">
+                             <span>Technical Support</span>
+                             <span className="font-medium">12%</span>
+                           </div>
+                           <div className="flex justify-between text-xs mt-1">
+                             <span>Complaint</span>
+                             <span className="font-medium">3%</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+ 
+                     <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+                       <div className="flex justify-between items-center pb-3 border-b border-gray-200 mb-3">
+                         <div className="font-medium text-gray-900">Analysis Verification</div>
+                         <button className="flex items-center text-xs px-2 py-1 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                           <Check className="w-3 h-3 mr-1" />
+                           <span>Approve</span>
+                         </button>
+                       </div>
+                       <div>
+                         <div className="text-sm mb-3">Is the AI analysis accurate and complete?</div>
+                         <div className="flex gap-2 mb-3">
+                           <button className="flex-1 flex justify-center items-center gap-1 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+                             <ThumbsUp className="w-4 h-4" />
+                             <span>Accurate</span>
+                           </button>
+                           <button className="flex-1 flex justify-center items-center gap-1 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+                             <Edit2 className="w-4 h-4" />
+                             <span>Edit</span>
+                           </button>
+                         </div>
+                         <div>
+                           <div className="text-xs text-gray-500 mb-1">Comments (optional)</div>
+                           <textarea className="w-full min-h-[5rem] p-2 text-xs border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="Add your verification notes here..."></textarea>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               )}
+ 
+               {/* History Tab Content */}
+               {activeTab === 'history' && (
+                 <div className="bg-white border border-gray-200 rounded-md p-5">
+                   <div className="relative ml-8 mt-8 mb-8">
+                     <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200 -ml-10"></div> {/* Fixed position */}
+                     
+                     {/* Timeline Items */}
+                     <div className="relative mb-6">
+                       <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div> {/* Adjusted position */}
+                       <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                         <div className="font-medium text-sm mb-1">Call Recording Uploaded</div>
+                         <div className="text-sm">File size: 15.3 MB, Format: AAC</div>
+                         <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:25</div>
+                       </div>
+                     </div>
+ 
+                     <div className="relative mb-6">
+                       <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div>
+                       <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                         <div className="font-medium text-sm mb-1">Added to Transcription Queue</div>
+                         <div className="text-sm">Priority: Standard, Position: 3</div>
+                         <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:26</div>
+                       </div>
+                     </div>
+                     
+                      <div className="relative mb-6">
+                        <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div>
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                          <div className="font-medium text-sm mb-1">Transcription Started</div>
+                          <div className="text-sm">Engine: ElevenLabs API</div>
+                          <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:28</div>
+                        </div>
+                      </div>
+                      
+                      <div className="relative mb-6">
+                        <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div>
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                          <div className="font-medium text-sm mb-1">Transcription Completed</div>
+                          <div className="text-sm">Confidence: 94%</div>
+                          <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:32</div>
+                        </div>
+                      </div>
+                      
+                      <div className="relative mb-6">
+                        <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div>
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                          <div className="font-medium text-sm mb-1">AI Analysis Started</div>
+                          <div className="text-sm">Engine: OpenAI GPT-4, Model: Financial Services</div>
+                          <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:33</div>
+                        </div>
+                      </div>
+                      
+                      <div className="relative mb-6">
+                        <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div>
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                          <div className="font-medium text-sm mb-1">AI Analysis Completed</div>
+                           <div className="text-sm">Status: Success</div>
+                          <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:36</div>
+                        </div>
+                      </div>
+                      
+                      <div className="relative mb-6">
+                        <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div>
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                          <div className="font-medium text-sm mb-1">Issue Identified</div>
+                          <div className="text-sm">Category: Transactions > Failed Transfer > Technical Error</div>
+                          <div className="text-sm">Severity: <span className="text-red-600 font-medium">Critical</span></div>
+                          <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:38</div>
+                        </div>
+                      </div>
+                      
+                      <div className="relative"> {/* Removed mb-6 from last item */}
+                        <div className="absolute left-0 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white -ml-10 -mt-0.5"></div>
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                          <div className="font-medium text-sm mb-1">Issue Escalated</div>
+                          <div className="text-sm">Escalated to: Technical Support Team</div>
+                          <div className="text-sm">Reason: Backend payment gateway integration timeout</div>
+                          <div className="text-xs text-gray-500 mt-1">Aug 21, 2023 - 13:40</div>
+                        </div>
+                      </div>
+ 
+                   </div>
+                 </div>
+               )}
+             </div>
+           </div>
+        ) : (
+          <>
+            {/* Dashboard */}
+            {activePage === 'dashboard' && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-gray-900 mb-1">Dashboard</h1>
+                    <div className="text-sm text-gray-500">Overview of your call analytics system</div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                      <Sliders className="w-4 h-4 mr-2" />
+                      <span>Filters</span>
+                    </button>
+                    <button
+                      className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-all"
+                      onClick={() => setShowUploadModal(true)}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      <span>Upload Calls</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Search Bar - Moved below header */}
+                <div className="flex justify-between items-center bg-white p-3 rounded-md shadow-sm mb-6 border border-gray-200">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Search by call ID, agent, or issue..."
+                      className="w-full pl-10 pr-2 py-2 border border-gray-300 rounded-md text-sm bg-gray-50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      <span>Last 7 days</span>
+                    </button>
+                    <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                      <Download className="w-4 h-4 mr-2" />
+                      <span>Export</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dashboard Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                   <div className="bg-white p-5 rounded-md shadow-sm border border-gray-200">
+                     <div className="text-sm text-gray-500 mb-2">Calls Processed</div>
+                     <div className="text-2xl font-semibold text-gray-900 mb-2">1,247</div>
+                     <div className="flex items-center text-xs">
+                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 mr-2">+7.2%</span>
+                       <span className="text-gray-500">vs last week</span>
+                     </div>
+                   </div>
+                   <div className="bg-white p-5 rounded-md shadow-sm border border-gray-200">
+                     <div className="text-sm text-gray-500 mb-2">Avg. Processing Time</div>
+                     <div className="text-2xl font-semibold text-gray-900 mb-2">3.4 min</div>
+                     <div className="flex items-center text-xs">
+                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 mr-2">+1.5%</span>
+                       <span className="text-gray-500">vs last week</span>
+                     </div>
+                   </div>
+                   <div className="bg-white p-5 rounded-md shadow-sm border border-gray-200">
+                     <div className="text-sm text-gray-500 mb-2">Resolution Rate</div>
+                     <div className="text-2xl font-semibold text-gray-900 mb-2">82.5%</div>
+                     <div className="flex items-center text-xs">
+                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 mr-2">+3.8%</span>
+                       <span className="text-gray-500">vs last week</span>
+                     </div>
+                   </div>
+                   <div className="bg-white p-5 rounded-md shadow-sm border border-gray-200">
+                     <div className="text-sm text-gray-500 mb-2">Critical Issues</div>
+                     <div className="text-2xl font-semibold text-gray-900 mb-2">17</div>
+                     <div className="flex items-center text-xs">
+                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 mr-2">-12.3%</span>
+                       <span className="text-gray-500">vs last week</span>
+                     </div>
+                   </div>
+                </div>
+
+                {/* Processing Queues */}
+                <div className="bg-white rounded-md shadow-sm mb-6 border border-gray-200">
+                  <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                    <div className="font-semibold text-gray-900">Processing Queues</div>
+                    <button className="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-all">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+                  <div className="p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Queue Columns */}
+                         <div className="border border-gray-200 rounded-md overflow-hidden bg-gray-50">
+                           <div className="bg-gray-100 p-3 border-b border-gray-200">
+                             <div className="font-medium text-gray-800">Upload Queue</div>
+                             <div className="text-xs text-gray-500">12 calls pending</div> {/* TODO: Dynamic data */}
+                           </div>
+                           <div className="max-h-64 overflow-y-auto bg-white"> {/* TODO: Fetch actual data */}
+                             <div className="p-3 border-b border-gray-200">
+                               <div className="font-medium text-sm text-gray-800 mb-1">CALL-2023-0467</div>
+                               <div className="flex justify-between text-xs text-gray-500">
+                                 <span>10.2 MB</span>
+                                 <span>Uploaded 5 mins ago</span>
+                               </div>
+                             </div>
+                             {/* Add more placeholder items */}
+                           </div>
+                         </div>
+                          <div className="border border-gray-200 rounded-md overflow-hidden bg-gray-50">
+                            <div className="bg-gray-100 p-3 border-b border-gray-200">
+                              <div className="font-medium text-gray-800">Transcription Queue</div>
+                              <div className="text-xs text-gray-500">5 calls in process</div> {/* TODO: Dynamic data */}
+                            </div>
+                            <div className="max-h-64 overflow-y-auto bg-white"> {/* TODO: Fetch actual data */}
+                              <div className="p-3 border-b border-gray-200">
+                                <div className="font-medium text-sm text-gray-800 mb-1">CALL-2023-0462</div>
+                                <div className="flex justify-between text-xs text-gray-500">
+                                  <span>Progress: 78%</span>
+                                  <span>ETA: 1:24</span>
+                                </div>
+                              </div>
+                               {/* Add more placeholder items */}
+                            </div>
+                          </div>
+                          <div className="border border-gray-200 rounded-md overflow-hidden bg-gray-50">
+                            <div className="bg-gray-100 p-3 border-b border-gray-200">
+                              <div className="font-medium text-gray-800">Analysis Queue</div>
+                              <div className="text-xs text-gray-500">8 transcripts pending</div> {/* TODO: Dynamic data */}
+                            </div>
+                            <div className="max-h-64 overflow-y-auto bg-white"> {/* TODO: Fetch actual data */}
+                              <div className="p-3 border-b border-gray-200">
+                                <div className="font-medium text-sm text-gray-800 mb-1">CALL-2023-0456</div>
+                                <div className="flex justify-between text-xs text-gray-500">
+                                  <span>AI analysis in progress</span>
+                                  <span>Started 2 mins ago</span>
+                                </div>
+                              </div>
+                               {/* Add more placeholder items */}
+                            </div>
+                          </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                {/* Recent Call Analysis Table */}
+                <div className="bg-white rounded-md shadow-sm border border-gray-200">
+                  <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                    <div className="font-semibold text-gray-900">Recent Call Analysis</div>
+                    <select className="p-2 text-sm border border-gray-300 rounded-md bg-white focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                      <option>All Categories</option>
+                      <option>Account Issues</option>
+                      <option>Transaction Problems</option>
+                      <option>Technical Support</option>
+                      <option>Product Inquiries</option>
+                    </select>
+                  </div>
+                  <div className="p-5">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Call ID</th>
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Date & Time</th>
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Duration</th>
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Category</th>
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Severity</th>
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Status</th>
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Agent</th>
+                            <th className="text-left p-3 font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                           {/* Table Rows - Replace with dynamic data */}
+                            <tr className="hover:bg-gray-50">
+                              <td className="p-3">CALL-2023-0452</td>
+                              <td className="p-3">Aug 21, 2023 14:35</td>
+                              <td className="p-3">08:42</td>
+                              <td className="p-3">Account Access > Login Issue</td>
+                              <td className="p-3"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">Medium</span></td>
+                              <td className="p-3"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Resolved</span></td>
+                              <td className="p-3">Raj Sharma</td>
+                              <td className="p-3">
+                                <button onClick={handleViewCall} className="inline-flex items-center px-2 py-1 bg-white border border-gray-300 rounded-md text-xs text-gray-700 hover:bg-gray-100 transition-all">
+                                  <Eye className="w-3.5 h-3.5 mr-1" /> View
+                                </button>
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-gray-50">
+                              <td className="p-3">CALL-2023-0451</td>
+                              <td className="p-3">Aug 21, 2023 13:22</td>
+                              <td className="p-3">15:18</td>
+                              <td className="p-3">Transactions > Failed Transfer</td>
+                              <td className="p-3"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Critical</span></td>
+                              <td className="p-3"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Escalated</span></td>
+                              <td className="p-3">Priya Patel</td>
+                              <td className="p-3">
+                                <button onClick={handleViewCall} className="inline-flex items-center px-2 py-1 bg-white border border-gray-300 rounded-md text-xs text-gray-700 hover:bg-gray-100 transition-all">
+                                  <Eye className="w-3.5 h-3.5 mr-1" /> View
+                                </button>
+                              </td>
+                            </tr>
+                            {/* Add more rows */}
+                        </tbody>
+                      </table>
+                    </div>
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-200 mt-4 text-sm text-gray-500">
+                      <div> Showing 1 to 5 of 128 entries </div> {/* TODO: Dynamic data */}
+                      <div className="flex items-center gap-1">
+                        <button className="px-2 py-1 border border-gray-200 rounded-sm bg-white text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50" disabled>Previous</button>
+                        <button className="px-2 py-1 border border-indigo-600 rounded-sm bg-indigo-600 text-sm text-white">1</button>
+                        <button className="px-2 py-1 border border-gray-200 rounded-sm bg-white text-sm text-gray-700 hover:bg-gray-100">2</button>
+                        <button className="px-2 py-1 border border-gray-200 rounded-sm bg-white text-sm text-gray-700 hover:bg-gray-100">3</button>
+                        <button className="px-2 py-1 border border-gray-200 rounded-sm bg-white text-sm text-gray-700 hover:bg-gray-100">Next</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Uploads Page */}
+            {activePage === 'uploads' && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-gray-900 mb-1">Call Uploads</h1>
+                    <div className="text-sm text-gray-500">Manage your call recording uploads and processing</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                      <Settings className="w-4 h-4 mr-2" />
+                      <span>Upload Settings</span>
+                    </button>
+                    <button
+                      className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-all"
+                      onClick={() => setShowUploadModal(true)}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      <span>Upload Calls</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Upload Section */}
+                <div className="bg-white rounded-md shadow-sm mb-6 border border-gray-200">
+                  <div className="p-4 border-b border-gray-200 font-semibold text-gray-900">
+                    Quick Upload
+                  </div>
+                  <div className="p-5">
+                    <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center mb-6 hover:border-indigo-600 transition-all cursor-pointer">
+                      <div className="mb-4 text-gray-400">
+                        <UploadCloud className="w-12 h-12 mx-auto" />
+                      </div>
+                      <div className="text-sm text-gray-700 mb-2">
+                        <strong>Click to upload</strong> or drag and drop call recordings
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Supports AAC audio files (Max: 50MB per file)
+                      </div>
+                      <input type="file" className="hidden" />
+                    </div>
+                    <div className="flex flex-wrap gap-4">
+                        <div className="flex-1 min-w-[240px]">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Processing Queue</label>
+                          <select className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                            <option>Standard Queue (~30 mins)</option>
+                            <option>Priority Queue (~10 mins)</option>
+                            <option>Batch Processing (Off-peak)</option>
+                          </select>
+                        </div>
+                        <div className="flex-1 min-w-[240px]">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Categories</label>
+                          <select className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                            <option>All Categories</option>
+                            <option>Account Issues</option>
+                            <option>Transaction Problems</option>
+                          </select>
+                        </div>
+                         <div className="flex-1 min-w-[240px]">
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                           <input 
+                             type="text" 
+                             placeholder="E.g., product-inquiry, escalation" 
+                             className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                           />
+                         </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Uploads Table Section */}
+                <div className="bg-white rounded-md shadow-sm border border-gray-200">
+                    <div className="flex justify-between items-center p-3 border-b border-gray-200">
+                      <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+                        <input 
+                          type="text" 
+                          placeholder="Search by call ID, date, or status..." 
+                          className="w-full pl-10 pr-2 py-2 border border-gray-300 rounded-md text-sm bg-gray-50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                          <Filter className="w-4 h-4 mr-2" />
+                          <span>Filter</span>
+                        </button>
+                        <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          <span>Last 7 days</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex border-b border-gray-200">
+                       <div 
+                         className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeUploadTab === 'recent' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 hover:border-gray-300'}`}
+                         onClick={() => setActiveUploadTab('recent')}
+                       > Recent Uploads </div>
+                       <div 
+                         className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeUploadTab === 'processing' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 hover:border-gray-300'}`}
+                         onClick={() => setActiveUploadTab('processing')}
+                       > Processing </div>
+                       <div 
+                         className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeUploadTab === 'completed' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 hover:border-gray-300'}`}
+                         onClick={() => setActiveUploadTab('completed')}
+                       > Completed </div>
+                       <div 
+                         className={`px-5 py-3 text-sm font-medium cursor-pointer border-b-2 transition-all ${activeUploadTab === 'failed' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-900 hover:border-gray-300'}`}
+                         onClick={() => setActiveUploadTab('failed')}
+                       > Failed </div>
+                    </div>
+
+                    {/* Upload Cards Grid */}
+                    <div className="p-5">
+                       {/* TODO: Filter cards based on activeUploadTab */}
+                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                         {/* Example Card: Processing */}
+                         <div className="border border-gray-200 rounded-md overflow-hidden bg-white">
+                           <div className="flex items-center gap-3 bg-gray-50 p-3 border-b border-gray-200">
+                             <div className="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-md flex items-center justify-center flex-shrink-0">
+                               <Mic className="w-4 h-4" />
+                             </div>
+                             <div className="font-medium text-sm text-gray-800 flex-1 truncate">CALL-2023-0475.aac</div>
+                             <button className="text-gray-500 hover:text-gray-700 flex-shrink-0">
+                               <MoreVertical className="w-4 h-4" />
+                             </button>
+                           </div>
+                           <div className="p-4">
+                             <div className="space-y-2 text-xs mb-4">
+                               <div className="flex justify-between"><span className="text-gray-500">Upload Date</span><span className="text-gray-700">Aug 21, 2023 15:42</span></div>
+                               <div className="flex justify-between"><span className="text-gray-500">File Size</span><span className="text-gray-700">12.4 MB</span></div>
+                               <div className="flex justify-between"><span className="text-gray-500">Duration</span><span className="text-gray-700">14:26</span></div>
+                               <div className="flex justify-between"><span className="text-gray-500">Queue</span><span className="text-gray-700">Standard</span></div>
+                             </div>
+                             <div className="mb-2">
+                               <div className="flex justify-between text-xs mb-1">
+                                 <span className="text-gray-500">Transcription Progress</span>
+                                 <span className="text-gray-700">45%</span>
+                               </div>
+                               <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                 <div className="h-full bg-indigo-600 rounded-full" style={{ width: '45%' }}></div>
+                               </div>
+                             </div>
+                           </div>
+                           <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 text-xs bg-gray-50">
+                             <div className="flex items-center text-indigo-700 gap-1">
+                               <Loader className="w-3 h-3 animate-spin" />
+                               <span>Processing</span>
+                             </div>
+                             <div className="flex gap-2">
+                               <button title="Pause Processing" className="text-gray-500 hover:text-gray-700"><Pause className="w-3.5 h-3.5" /></button>
+                               <button title="View Details" className="text-gray-500 hover:text-gray-700"><Info className="w-3.5 h-3.5" /></button>
+                             </div>
+                           </div>
+                         </div>
+                          {/* Example Card: Completed */}
+                          <div className="border border-gray-200 rounded-md overflow-hidden bg-white">
+                            <div className="flex items-center gap-3 bg-gray-50 p-3 border-b border-gray-200">
+                              <div className="w-8 h-8 bg-green-100 text-green-700 rounded-md flex items-center justify-center flex-shrink-0">
+                                <Check className="w-4 h-4" />
+                              </div>
+                              <div className="font-medium text-sm text-gray-800 flex-1 truncate">CALL-2023-0472.aac</div>
+                              <button className="text-gray-500 hover:text-gray-700 flex-shrink-0">
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="p-4">
+                              <div className="space-y-2 text-xs mb-4">
+                                <div className="flex justify-between"><span className="text-gray-500">Upload Date</span><span className="text-gray-700">Aug 21, 2023 15:22</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500">File Size</span><span className="text-gray-700">7.8 MB</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500">Duration</span><span className="text-gray-700">08:34</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500">Queue</span><span className="text-gray-700">Priority</span></div>
+                              </div>
+                              <div className="space-y-1 text-xs">
+                                <div><span className="text-gray-500">Category:</span> <span className="text-gray-700 font-medium">Account Issues</span></div>
+                                <div><span className="text-gray-500">Severity:</span> <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">Medium</span></div>
+                                <div><span className="text-gray-500">Status:</span> <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Resolved</span></div>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 text-xs bg-gray-50">
+                              <div className="flex items-center text-green-600 gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                <span>Completed</span>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={handleViewCall} title="View Transcript" className="text-gray-500 hover:text-gray-700"><FileText className="w-3.5 h-3.5" /></button>
+                                <button title="View Details" className="text-gray-500 hover:text-gray-700"><Info className="w-3.5 h-3.5" /></button>
+                              </div>
+                            </div>
+                          </div>
+                         {/* Add more cards */}
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            )}
+
+            {/* Transcripts Page */}
+            {activePage === 'transcripts' && (
+               <div className="flex gap-6 h-[calc(100vh-4rem)]"> {/* Adjust height as needed */}
+                 {/* Left side: Recordings list */}
+                 <div className="w-80 flex-shrink-0 flex flex-col bg-white rounded-md shadow-sm border border-gray-200">
+                   <div className="p-4 border-b border-gray-200">
+                     <div className="font-medium text-gray-900 mb-2">Call Recordings</div>
+                     <div className="relative">
+                       <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+                       <input 
+                         type="text" 
+                         placeholder="Search recordings..." 
+                         className="w-full pl-8 pr-2 py-1.5 border border-gray-300 rounded-md text-sm bg-gray-50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all"
+                       />
+                     </div>
+                   </div>
+                   <div className="flex-1 overflow-y-auto">
+                      {/* Recording List Items - Replace with dynamic data */}
+                       <div className="p-3 border-b border-gray-200 bg-indigo-50 cursor-pointer" onClick={handleViewCall}>
+                         <div className="font-medium text-sm text-gray-900 mb-1">CALL-2023-0451</div>
+                         <div className="text-xs text-gray-600 mb-1 truncate">Transactions > Failed Transfer</div>
+                         <div className="flex justify-between text-xs text-gray-500 mb-2">
+                           <span>Aug 21, 2023</span>
+                           <span>15:18</span>
+                         </div>
+                         <div className="flex justify-between items-center">
+                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Escalated</span>
+                           <span className="text-xs text-gray-500">Priya Patel</span>
+                         </div>
+                       </div>
+                       <div className="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer" onClick={handleViewCall}>
+                         <div className="font-medium text-sm text-gray-900 mb-1">CALL-2023-0450</div>
+                         <div className="text-xs text-gray-600 mb-1 truncate">Product Info > Investment Plans</div>
+                         <div className="flex justify-between text-xs text-gray-500 mb-2">
+                           <span>Aug 21, 2023</span>
+                           <span>04:37</span>
+                         </div>
+                         <div className="flex justify-between items-center">
+                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Resolved</span>
+                           <span className="text-xs text-gray-500">Amit Kumar</span>
+                         </div>
+                       </div>
+                      {/* Add more items */}
+                   </div>
+                 </div>
+     
+                 {/* Center: Placeholder */}
+                 <div className="flex-1 flex items-center justify-center p-8 bg-white rounded-md shadow-sm border border-gray-200">
+                   <div className="text-center text-gray-500">
+                     <div className="mb-4">
+                       <FileText className="w-16 h-16 mx-auto text-gray-300" />
+                     </div>
+                     <h3 className="text-lg font-medium text-gray-700 mb-1">Select a Call Recording</h3>
+                     <p className="text-sm max-w-xs mx-auto">Choose a call from the list to view its details, transcript, and analysis.</p>
+                     <button 
+                       className="mt-4 inline-flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-all"
+                       onClick={() => setShowUploadModal(true)}
+                     >
+                       <Upload className="w-4 h-4 mr-2" />
+                       <span>Upload New Recording</span>
+                     </button>
+                   </div>
+                 </div>
+               </div>
+            )}
+            
+            {/* Other Pages */}
+            {activePage === 'analytics' && <PlaceholderContent title="Analytics" />}
+            {activePage === 'queues' && <PlaceholderContent title="Queues" />}
+            {activePage === 'reports' && <PlaceholderContent title="Reports" />}
+            {activePage === 'team' && <PlaceholderContent title="Team Management" />}
+            {activePage === 'settings' && <PlaceholderContent title="Settings" />}
+            
+          </>
+        )}
+
+        {/* Upload Modal */}
+        {showUploadModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+              <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Upload Call Recordings</h3>
+                <button
+                  className="text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowUploadModal(false)}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center mb-6 hover:border-indigo-600 transition-all cursor-pointer">
+                  <div className="mb-4 text-gray-400">
+                    <UploadCloud className="w-12 h-12 mx-auto" />
+                  </div>
+                  <div className="text-sm text-gray-700 mb-2">
+                    <strong>Click to upload</strong> or drag and drop
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Supports AAC audio files (Max: 50MB)
+                  </div>
+                  {/* TODO: Add actual file input handling */}
+                  <input type="file" className="hidden" multiple accept=".aac" /> 
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Processing Queue</label>
+                  <select className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <option>Standard Queue (~30 mins)</option>
+                    <option>Priority Queue (~10 mins)</option>
+                    <option>Batch Processing (Off-peak)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="E.g., product-inquiry, escalation"
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <button
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  onClick={() => setShowUploadModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                  onClick={() => {
+                     /* TODO: Add upload logic */ 
+                     setShowUploadModal(false);
+                  }}
+                >
+                  Start Upload
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div> {/* End Main Content */}
+    </div> /* End Root Div */
+  );
+};
+
+export default CallInsightApp;

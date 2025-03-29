@@ -1,0 +1,83 @@
+{
+    "Comment": "Workflow to orchestrate audio transcription and analysis",
+    "StartAt": "TranscribeAudio",
+    "States": {
+      "TranscribeAudio": {
+        "Type": "Task",
+        "Comment": "Invoke Lambda function to transcribe audio from S3 using ElevenLabs",
+        "Resource": "${LambdaTranscribeArn}",
+        "Parameters": {
+          "call_id.$": "$.call_id",
+          "s3_bucket_name.$": "$.s3_bucket_name",
+          "s3_object_key.$": "$.s3_object_key",
+          "profile_id.$": "$.profile_id"
+        },
+        "ResultPath": "$.TranscriptionOutput",
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 2,
+            "MaxAttempts": 3,
+            "BackoffRate": 2.0
+          }
+        ],
+        "Catch": [
+          {
+            "ErrorEquals": [ "States.ALL" ],
+            "Comment": "Catch all transcription errors",
+            "ResultPath": "$.errorInfo",
+            "Next": "MarkFailed"
+          }
+        ],
+        "Next": "AnalyzeTranscript"
+      },
+      "AnalyzeTranscript": {
+        "Type": "Task",
+        "Comment": "Invoke Lambda function to analyze transcript using OpenAI",
+        "Resource": "${LambdaAnalyzeArn}",
+        "Parameters": {
+          "call_id.$": "$.call_id",
+          "profile_id.$": "$.profile_id"
+        },
+        "ResultPath": "$.AnalysisOutput",
+         "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException",
+              "States.Timeout"
+            ],
+            "IntervalSeconds": 3,
+            "MaxAttempts": 3,
+            "BackoffRate": 2.0
+          }
+        ],
+        "Catch": [
+          {
+            "ErrorEquals": [ "States.ALL" ],
+            "Comment": "Catch all analysis errors",
+            "ResultPath": "$.errorInfo",
+            "Next": "MarkFailed"
+          }
+        ],
+        "Next": "MarkCompleted"
+      },
+      "MarkCompleted": {
+        "Type": "Succeed",
+        "Comment": "Workflow completed successfully (status updated by Lambda_Analyze)"
+      },
+      "MarkFailed": {
+        "Type": "Fail",
+        "Comment": "Workflow failed (status updated by failing Lambda)",
+        "CausePath": "$.errorInfo.Cause",
+        "ErrorPath": "$.errorInfo.Error"
+      }
+    }
+  }

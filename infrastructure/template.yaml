@@ -1,0 +1,528 @@
+# This line tells AWS that this is a SAM template
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+# Description helps you remember what this template is for
+Description: >
+  Call Insight Application: Complete infrastructure including IAM Roles,
+  S3 Buckets, DynamoDB Table, SQS Queues, Lambda Functions, Step Functions, 
+  API Gateway, and Secrets Manager.
+
+# Global settings for all Lambda functions
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 256
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref CallInsightTable
+        RECORDINGS_BUCKET: !Ref S3RecordingsBucket
+
+# This is where we define all the AWS resources we want to create.
+Resources:
+  # --- Secrets Manager Secrets (Placeholders) ---
+  # IMPORTANT: We create the secret 'name' here, but you MUST add the
+  # actual secret VALUE manually in the AWS Console after deployment.
+
+  ElevenLabsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: call-insight/elevenlabs-api-key # A descriptive name for the secret
+      Description: API Key for the ElevenLabs service used by Lambda_Transcribe.
+
+  OpenAiSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: call-insight/openai-api-key # A descriptive name for the secret
+      Description: API Key for the OpenAI service used by Lambda_Analyze.
+
+
+  # --- S3 Buckets ---
+
+  S3RecordingsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Bucket names must be globally unique. Using AWS Account ID and Region helps.
+      BucketName: !Sub call-insight-recordings-${AWS::AccountId}-${AWS::Region}
+      # Block all public access to keep recordings private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # CORS allows our web UI (running in a browser) to upload directly to this bucket.
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*' # Allow any header in the upload request
+            AllowedMethods:
+              - PUT # Allow uploading files
+              - GET # Allow getting files (maybe needed for checking existence)
+            AllowedOrigins:
+              # !!! SECURITY WARNING !!!
+              # '*' allows ANY website to try uploading. For production, REPLACE '*'
+              # with your specific website domain, e.g., https://my-call-app.com
+              - '*'
+            MaxAge: 3000 # Cache CORS response for 50 minutes
+
+  S3UIBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub call-insight-ui-${AWS::AccountId}-${AWS::Region}
+      # Remove AccessControl: PublicRead
+      # Configure it to act like a website host
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+      # Configure PublicAccessBlockConfiguration to allow policies to grant public access
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true         # Block ACLs
+        BlockPublicPolicy: false      # Allow bucket policies for public access
+        IgnorePublicAcls: true        # Ignore any ACLs
+        RestrictPublicBuckets: false  # Don't restrict all public access from policies
+
+  S3UIBucketPolicy: # This policy explicitly allows anyone ('*') to read files (GetObject)
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3UIBucket # Apply this policy to the UI bucket defined above
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*' # Means 'anyone'
+            Action: s3:GetObject # Allow reading objects
+            # Allow reading any object ('*') inside the UI bucket
+            Resource: !Sub arn:aws:s3:::${S3UIBucket}/*
+
+  # --- DynamoDB Tables ---
+
+  CallInsightTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: CallInsightTable # You can make this unique too if needed: !Sub CallInsightTable-${AWS::Region}
+      # Define the attributes that will be used as Keys.
+      # You can add MORE attributes to items later without defining them here.
+      AttributeDefinitions:
+        - AttributeName: call_id # The main unique identifier for each call record
+          AttributeType: S # S means String type
+        # If you add Global Secondary Indexes (GSIs) later for querying by other fields
+        # (like 'status'), you would define their key attributes here too.
+        - AttributeName: status
+          AttributeType: S
+      # Define the Primary Key structure.
+      KeySchema:
+        - AttributeName: call_id
+          KeyType: HASH # HASH means Partition Key (the main lookup key)
+      # Add a GSI for querying by status
+      GlobalSecondaryIndexes:
+        - IndexName: StatusIndex
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          # Use the same billing mode as the main table
+          # For production, you might want to set specific provisioned capacity
+      # Billing mode: Pay only for what you read/write. Easier to start with.
+      BillingMode: PAY_PER_REQUEST
+      # Optional: Automatically delete items after 90 days
+      TimeToLiveSpecification:
+        AttributeName: ttl # You'd add a 'ttl' attribute (number, epoch timestamp) to your items
+        Enabled: true
+
+  ProfilesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ProfilesTable
+      AttributeDefinitions:
+        - AttributeName: profile_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: profile_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # --- SQS Queues ---
+
+  SqsTranscriptionDLQ: # The Dead-Letter Queue (for failed messages)
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: CallInsight-TranscriptionDLQ # Specific name for the DLQ
+      MessageRetentionPeriod: 1209600 # Keep failed messages for 14 days (in seconds)
+
+  SqsTranscriptionQueue: # The main queue for transcription tasks
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: CallInsight-TranscriptionQueue # Specific name for the main queue
+      VisibilityTimeout: 300 # Hide message for 5 mins (adjust based on expected processing time)
+      # Link the Dead-Letter Queue (DLQ) using a Redrive Policy
+      RedrivePolicy:
+        # ARN (unique ID) of the DLQ we defined above
+        deadLetterTargetArn: !GetAtt SqsTranscriptionDLQ.Arn
+        # Send message to DLQ after it fails this many processing attempts
+        maxReceiveCount: 5
+
+  SqsUploadQueue: # Queue for handling file uploads
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: CallInsight-UploadQueue
+      VisibilityTimeout: 300
+      # Add a DLQ for upload failures too
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SqsUploadDLQ.Arn
+        maxReceiveCount: 3
+
+  SqsUploadDLQ: # DLQ for upload failures
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: CallInsight-UploadDLQ
+      MessageRetentionPeriod: 1209600 # 14 days
+
+
+  # --- IAM Roles and Policies ---
+  # Defines permissions for different components of the application.
+
+  LambdaOrchestratorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CallInsight-LambdaOrchestratorRole # Clear name for the role
+      # This section defines WHO can assume (use) this role. Here, it's Lambda functions.
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      # These are the permissions GRANTED to the entity assuming this role.
+      Policies:
+        - PolicyName: OrchestratorPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow # Allow writing logs (essential for debugging)
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: 'arn:aws:logs:*:*:*' # Allows logging to any log group (can be restricted)
+              - Effect: Allow # Allow getting messages from the Transcription SQS Queue
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                # Only allow accessing the specific SQS queue we created
+                Resource: !GetAtt SqsTranscriptionQueue.Arn
+              - Effect: Allow # Allow starting the Step Functions state machine
+                Action:
+                  - states:StartExecution
+                Resource: !GetAtt CallInsightStateMachine.Arn
+              - Effect: Allow # Allow updating the DynamoDB table (e.g., set status to 'Queued')
+                Action:
+                  - dynamodb:UpdateItem
+                # Only allow accessing the specific DynamoDB table we created
+                Resource: !GetAtt CallInsightTable.Arn
+
+  LambdaTranscribeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CallInsight-LambdaTranscribeRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: TranscribePermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow # Allow writing logs
+                Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents']
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow # Allow reading audio files from the Recordings S3 Bucket
+                Action:
+                  - s3:GetObject
+                # Only allow reading objects FROM the specific S3 Recordings bucket
+                Resource: !Sub arn:aws:s3:::${S3RecordingsBucket}/*
+              - Effect: Allow # Allow writing results/status back to DynamoDB
+                Action:
+                  - dynamodb:PutItem # Create new items (might be needed if record doesn't exist?)
+                  - dynamodb:UpdateItem # Update existing items
+                Resource: !GetAtt CallInsightTable.Arn
+              - Effect: Allow # Allow reading the ElevenLabs API Key from Secrets Manager
+                Action:
+                  - secretsmanager:GetSecretValue
+                # Only allow reading the specific secret we defined
+                Resource: !Ref ElevenLabsSecret
+
+  LambdaAnalyzeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CallInsight-LambdaAnalyzeRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AnalyzePermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow # Allow writing logs
+                Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents']
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow # Allow reading/updating items in DynamoDB (get transcription, write analysis)
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt CallInsightTable.Arn
+              - Effect: Allow # Allow reading the OpenAI API Key from Secrets Manager
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref OpenAiSecret
+              - Effect: Allow # Allow reading from the Profiles table
+                Action:
+                  - dynamodb:GetItem
+                Resource: !GetAtt ProfilesTable.Arn
+
+  StepFunctionsStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CallInsight-StepFunctionsRole
+      # State machines need a different service principal
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              # Allow the Step Functions service in your current region to assume this role
+              Service: !Sub states.${AWS::Region}.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StateMachinePermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow # Allow the state machine to invoke our Lambda functions
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt LambdaTranscribe.Arn
+                  - !GetAtt LambdaAnalyze.Arn
+              - Effect: Allow # Allow Step Functions to update DynamoDB directly
+                Action:
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt CallInsightTable.Arn
+
+  LambdaApiRole: # Role for the Lambda function that handles requests from the UI
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CallInsight-LambdaApiRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ApiPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow # Allow writing logs
+                Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents']
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow # Allow full access to the DynamoDB table (for UI queries, updates)
+                Action:
+                  - dynamodb:Query # Query items (e.g., list calls)
+                  - dynamodb:GetItem # Get details of a single call
+                  - dynamodb:PutItem # Create initial record for a call
+                  - dynamodb:UpdateItem # Update status (e.g., 'Uploading')
+                Resource:
+                  - !GetAtt CallInsightTable.Arn
+                  - !Sub ${CallInsightTable.Arn}/index/*
+              - Effect: Allow # Allow GENERATING presigned S3 URLs for uploads
+                Action:
+                  - s3:PutObject # This permission on the bucket allows creating a presigned PUT URL
+                Resource: !Sub arn:aws:s3:::${S3RecordingsBucket}/* # Can only create URLs for this bucket
+              - Effect: Allow # Allow sending messages to the Upload SQS Queue
+                Action:
+                  - sqs:SendMessage
+                Resource: !GetAtt SqsUploadQueue.Arn
+
+  # --- Lambda Functions ---
+
+  LambdaOrchestrator:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CallInsight-Orchestrator
+      Description: Reads from SQS and triggers the Step Functions workflow
+      CodeUri: ./lambda-orchestrator/  # You'll need this directory with code
+      Handler: index.handler
+      Role: !GetAtt LambdaOrchestratorRole.Arn
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref CallInsightStateMachine
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SqsTranscriptionQueue.Arn
+            BatchSize: 1
+
+  LambdaTranscribe:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CallInsight-Transcribe
+      Description: Transcribes audio files using ElevenLabs
+      CodeUri: ./lambda-transcribe/  # You'll need this directory with code
+      Handler: index.handler
+      Role: !GetAtt LambdaTranscribeRole.Arn
+      Timeout: 300  # 5 minutes to handle larger audio files
+      MemorySize: 512  # Increased memory for audio processing
+      Environment:
+        Variables:
+          ELEVENLABS_SECRET_ARN: !Ref ElevenLabsSecret
+
+  LambdaAnalyze:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CallInsight-Analyze
+      Description: Analyzes transcriptions using OpenAI
+      CodeUri: ./lambda-analyze/  # You'll need this directory with code
+      Handler: index.handler
+      Role: !GetAtt LambdaAnalyzeRole.Arn
+      Timeout: 300  # 5 minutes for AI analysis
+      MemorySize: 512
+      Environment:
+        Variables:
+          OPENAI_SECRET_ARN: !Ref OpenAiSecret
+          USE_PROFILES: 'true'
+          DEFAULT_PROFILE_ID: 'default'
+          PROFILES_TABLE: !Ref ProfilesTable
+
+  LambdaApi:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CallInsight-API
+      Description: API handler for the UI
+      CodeUri: ./lambda-api/  # You'll need this directory with code
+      Handler: index.handler
+      Role: !GetAtt LambdaApiRole.Arn
+      Environment:
+        Variables:
+          UPLOAD_QUEUE_URL: !Ref SqsUploadQueue
+      Events:
+        # Define API Gateway events for different endpoints
+        CreateCall:
+          Type: Api
+          Properties:
+            Path: /calls
+            Method: post
+            RestApiId: !Ref CallInsightApi
+        GetCall:
+          Type: Api
+          Properties:
+            Path: /calls/{callId}
+            Method: get
+            RestApiId: !Ref CallInsightApi
+        ListCalls:
+          Type: Api
+          Properties:
+            Path: /calls
+            Method: get
+            RestApiId: !Ref CallInsightApi
+        GetUploadUrl:
+          Type: Api
+          Properties:
+            Path: /calls/{callId}/upload-url
+            Method: get
+            RestApiId: !Ref CallInsightApi
+
+  # --- Step Functions State Machine ---
+
+  CallInsightStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: CallInsight-StateMachine
+      Type: STANDARD
+      DefinitionUri: statemachine/workflow.asl.json  # State machine definition file
+      # Add substitutions for placeholders used in the ASL file
+      DefinitionSubstitutions:
+        LambdaTranscribeArn: !GetAtt LambdaTranscribe.Arn
+        LambdaAnalyzeArn: !GetAtt LambdaAnalyze.Arn
+      Role: !GetAtt StepFunctionsStateMachineRole.Arn
+      Tags:
+        Project: CallInsight
+        Environment: Dev
+
+  # --- API Gateway ---
+
+  CallInsightApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: CallInsight-API
+      StageName: api
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: "'*'" # Replace with specific domains in production
+
+# This section lets us easily see important created resource names/IDs after deployment.
+Outputs:
+  S3RecordingsBucketName:
+    Description: Name of the S3 bucket for audio recordings
+    Value: !Ref S3RecordingsBucket # Get the name of the bucket
+  S3UIBucketName:
+    Description: Name of the S3 bucket for UI assets
+    Value: !Ref S3UIBucket
+  S3UIBucketWebsiteURL:
+    Description: URL for the S3 UI bucket website endpoint (where you access the UI)
+    Value: !GetAtt S3UIBucket.WebsiteURL # Get the special WebsiteURL property
+  DynamoDBTableName:
+    Description: Name of the DynamoDB table for call insights
+    Value: !Ref CallInsightTable
+  ProfilesTableName:
+    Description: Name of the DynamoDB table for analysis profiles
+    Value: !Ref ProfilesTable
+  SqsTranscriptionQueueURL:
+    Description: URL of the SQS queue for transcription tasks
+    Value: !Ref SqsTranscriptionQueue # Get the Queue URL
+  SqsTranscriptionDLQUrl:
+    Description: URL of the SQS Dead Letter Queue for transcription tasks
+    Value: !Ref SqsTranscriptionDLQ
+  ElevenLabsSecretARN:
+    Description: ARN of the Secrets Manager secret for ElevenLabs API Key
+    Value: !Ref ElevenLabsSecret # Get the ARN of the secret
+  OpenAiSecretARN:
+    Description: ARN of the Secrets Manager secret for OpenAI API Key
+    Value: !Ref OpenAiSecret
+  ApiUrl:
+    Description: URL of the API Gateway endpoint
+    Value: !Sub https://${CallInsightApi}.execute-api.${AWS::Region}.amazonaws.com/api/
+  StateMachineArn:
+    Description: ARN of the Step Functions state machine
+    Value: !Ref CallInsightStateMachine
+  # IAM Role ARNs
+  LambdaTranscribeRoleArn:
+    Description: ARN of the IAM Role for the Transcribe Lambda
+    Value: !GetAtt LambdaTranscribeRole.Arn
+  LambdaAnalyzeRoleArn:
+    Description: ARN of the IAM Role for the Analyze Lambda
+    Value: !GetAtt LambdaAnalyzeRole.Arn
+  LambdaApiRoleArn:
+    Description: ARN of the IAM Role for the API Lambda
+    Value: !GetAtt LambdaApiRole.Arn
+  StepFunctionsRoleArn:
+    Description: ARN of the IAM Role for the Step Functions State Machine
+    Value: !GetAtt StepFunctionsStateMachineRole.Arn
