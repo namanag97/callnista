@@ -39,7 +39,6 @@ Resources:
       Name: call-insight/openai-api-key # A descriptive name for the secret
       Description: API Key for the OpenAI service used by Lambda_Analyze.
 
-
   # --- S3 Buckets ---
 
   S3RecordingsBucket:
@@ -181,6 +180,12 @@ Resources:
       QueueName: CallInsight-UploadDLQ
       MessageRetentionPeriod: 1209600 # 14 days
 
+  # --- SNS Topic for Alarms ---
+  SNSAlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AWS::StackName}-Alarms"
+      DisplayName: "CallInsight Alarms"
 
   # --- IAM Roles and Policies ---
   # Defines permissions for different components of the application.
@@ -294,6 +299,38 @@ Resources:
                   - dynamodb:GetItem
                 Resource: !GetAtt ProfilesTable.Arn
 
+  LambdaUpdateStatusRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CallInsight-LambdaUpdateStatusRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: UpdateStatusPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow # Allow writing logs
+                Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents']
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow # Allow updating items in DynamoDB
+                Action:
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt CallInsightTable.Arn
+              - Effect: Allow # Allow emitting CloudWatch metrics
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+              - Effect: Allow # Allow publishing to SNS topic for alarms
+                Action:
+                  - sns:Publish
+                Resource: !Ref SNSAlarmTopic
+
   StepFunctionsStateMachineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -318,6 +355,7 @@ Resources:
                 Resource:
                   - !GetAtt LambdaTranscribe.Arn
                   - !GetAtt LambdaAnalyze.Arn
+                  - !GetAtt LambdaUpdateStatus.Arn
               - Effect: Allow # Allow Step Functions to update DynamoDB directly
                 Action:
                   - dynamodb:UpdateItem
@@ -411,6 +449,18 @@ Resources:
           DEFAULT_PROFILE_ID: 'default'
           PROFILES_TABLE: !Ref ProfilesTable
 
+  LambdaUpdateStatus:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CallInsight-UpdateStatus
+      Description: Updates call status and records metrics for Step Functions
+      CodeUri: ./lambda-update-status/
+      Handler: index.handler
+      Role: !GetAtt LambdaUpdateStatusRole.Arn
+      Environment:
+        Variables:
+          ALARM_TOPIC_ARN: !Ref SNSAlarmTopic
+
   LambdaApi:
     Type: AWS::Serverless::Function
     Properties:
@@ -461,10 +511,53 @@ Resources:
       DefinitionSubstitutions:
         LambdaTranscribeArn: !GetAtt LambdaTranscribe.Arn
         LambdaAnalyzeArn: !GetAtt LambdaAnalyze.Arn
+        LambdaUpdateStatusArn: !GetAtt LambdaUpdateStatus.Arn
       Role: !GetAtt StepFunctionsStateMachineRole.Arn
       Tags:
         Project: CallInsight
         Environment: Dev
+
+  # --- CloudWatch Alarms ---
+
+  SQSTranscriptionQueueDepthAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${AWS::StackName}-TranscriptionQueueDepth"
+      AlarmDescription: "Alarm if transcription queue has more than 100 messages for 15 minutes"
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt SqsTranscriptionQueue.QueueName
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 100
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref SNSAlarmTopic
+      OKActions:
+        - !Ref SNSAlarmTopic
+
+  DLQMessageAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${AWS::StackName}-DLQMessages"
+      AlarmDescription: "Alarm if any messages appear in the DLQ"
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt SqsTranscriptionDLQ.QueueName
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref SNSAlarmTopic
+      OKActions:
+        - !Ref SNSAlarmTopic
 
   # --- API Gateway ---
 
@@ -507,6 +600,9 @@ Outputs:
   OpenAiSecretARN:
     Description: ARN of the Secrets Manager secret for OpenAI API Key
     Value: !Ref OpenAiSecret
+  SNSAlarmTopicARN:
+    Description: ARN of the SNS topic for alarms
+    Value: !Ref SNSAlarmTopic
   ApiUrl:
     Description: URL of the API Gateway endpoint
     Value: !Sub https://${CallInsightApi}.execute-api.${AWS::Region}.amazonaws.com/api/
