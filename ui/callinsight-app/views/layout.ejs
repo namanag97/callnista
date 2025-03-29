@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CallInsight | <%= title %></title>
     <link rel="stylesheet" href="/css/main.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body>
     <div class="app-container">
         <!-- Include sidebar -->
-        <%- include('sidebar') %>
+        <%- include('./sidebar', { page: typeof page !== 'undefined' ? page : '' }) %>
         
         <!-- Main Content -->
         <div class="main-content">
@@ -18,6 +18,14 @@
         </div>
     </div>
     
+    <script>
+        // Initialize Feather icons once DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        });
+    </script>
     <script src="/js/main.js"></script>
 </body>
 </html>
